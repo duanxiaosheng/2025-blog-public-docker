@@ -4,18 +4,23 @@
 
 ---
 
-## 一键 Docker 部署
+## 部署方式一：Docker Compose 部署
 
-### 1. 克隆项目
+适合自己有服务器、能进入终端的用户。
+
+### 国内推荐使用 Gitee
+
+```bash
+git clone https://gitee.com/duanxiaosheng/2025-blog-local-docker.git
+cd 2025-blog-local-docker
+docker compose up -d --build
+```
+
+### GitHub 地址
 
 ```bash
 git clone https://github.com/duanxiaosheng/2025-blog-public-docker.git
 cd 2025-blog-public-docker
-```
-
-### 2. 启动
-
-```bash
 docker compose up -d --build
 ```
 
@@ -29,6 +34,34 @@ http://服务器IP:3000
 
 ```txt
 http://localhost:3000
+```
+
+---
+
+## 部署方式二：宝塔「命令创建」部署
+
+适合宝塔面板用户：
+
+```txt
+宝塔面板 → Docker → 容器 → 创建容器 → 命令创建
+```
+
+> 注意：这种方式需要一个已经构建好的 Docker 镜像。
+> 当前如果还没有发布 Docker Hub / 阿里云 ACR 镜像，请优先使用上面的 Gitee + Docker Compose 部署方式。
+
+有可用镜像后，可以粘贴类似下面的命令：
+
+```bash
+docker run -d \
+  --name 2025-blog-public-docker \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e PORT=3000 \
+  -e DATA_DIR=/app/data \
+  -e SESSION_SECRET=change-this-session-secret \
+  -v /www/wwwroot/2025-blog-public-docker-data:/app/data \
+  你的镜像地址:latest
 ```
 
 ---
@@ -77,10 +110,20 @@ DATA_DIR=/app/data
 
 ## 数据保存在哪里
 
-运行数据保存在项目目录下：
+### Docker Compose 部署
+
+运行数据默认保存在项目目录下：
 
 ```txt
 ./data
+```
+
+### 宝塔命令创建部署
+
+如果使用上面的 `docker run` 命令，数据保存在：
+
+```txt
+/www/wwwroot/2025-blog-public-docker-data
 ```
 
 里面包含：
@@ -91,13 +134,7 @@ DATA_DIR=/app/data
 - 管理员初始化密码信息
 - 点赞数据
 
-Docker 映射：
-
-```yaml
-./data:/app/data
-```
-
-只要 `data` 目录还在，重建容器不会丢数据。
+只要数据目录还在，重建容器不会丢数据。
 
 ---
 
@@ -111,11 +148,7 @@ Docker 映射：
 docker compose ps
 ```
 
-再看日志：
-
-```bash
-docker compose logs --tail=200
-```
+或查看 Docker 容器日志。
 
 常见原因：
 
@@ -127,6 +160,8 @@ docker compose logs --tail=200
 ---
 
 ### 2. 怎么修改访问端口？
+
+### Docker Compose
 
 创建 `.env`：
 
@@ -147,10 +182,18 @@ docker compose down
 docker compose up -d --build
 ```
 
-访问：
+### docker run
 
-```txt
-http://服务器IP:3001
+把：
+
+```bash
+-p 3000:3000
+```
+
+改成：
+
+```bash
+-p 3001:3000
 ```
 
 ---
@@ -159,13 +202,7 @@ http://服务器IP:3001
 
 不会。
 
-文章、图片和配置都保存在：
-
-```txt
-./data
-```
-
-只要不删除 `data` 目录，数据就还在。
+只要不删除数据目录，文章、图片和配置就还在。
 
 ---
 
@@ -175,18 +212,25 @@ http://服务器IP:3001
 
 必须：
 
-1. 登录服务器，删掉此项目目录下的：
+1. 登录服务器，删掉此项目数据目录下的：
 
 ```txt
-data/config/admin-auth.json
+config/admin-auth.json
 ```
 
-2. 重启 Docker：
+Docker Compose 默认位置通常是：
 
-```bash
-docker compose down
-docker compose up -d
+```txt
+项目目录/data/config/admin-auth.json
 ```
+
+宝塔命令创建默认位置通常是：
+
+```txt
+/www/wwwroot/2025-blog-public-docker-data/config/admin-auth.json
+```
+
+2. 重启 Docker。
 
 3. 重新打开网站，即可再次进入“初始化管理员密码”流程。
 
@@ -196,19 +240,12 @@ docker compose up -d
 
 先检查：
 
-1. 是否已经重新 build
+1. 是否已经重新 build / 重启容器
 2. 浏览器 Network 里图片是否 404
-3. 图片文件是否存在于：
+3. 图片文件是否存在于数据目录的：
 
 ```txt
-data/public/blogs/<slug>/
-```
-
-如果刚更新过代码，先执行：
-
-```bash
-docker compose down
-docker compose up -d --build
+public/blogs/<slug>/
 ```
 
 ---
@@ -217,15 +254,11 @@ docker compose up -d --build
 
 需要带走：
 
-- 项目代码
+- 项目代码（如果使用 Compose）
 - `.env`（如果你创建过）
-- `data/`
+- 数据目录
 
-在新服务器执行：
-
-```bash
-docker compose up -d --build
-```
+在新服务器重新启动容器即可。
 
 ---
 
@@ -245,11 +278,17 @@ docker compose up -d --build
 
 ## 更新项目
 
+### Docker Compose
+
 ```bash
 git pull
 docker compose down
 docker compose up -d --build
 ```
+
+### 镜像部署
+
+重新拉取最新镜像并重建容器即可。
 
 ---
 
