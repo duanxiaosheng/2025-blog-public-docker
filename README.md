@@ -67,20 +67,31 @@ git clone <your-repo-url>
 cd 2025-blog-public-adapt
 ```
 
-### 2. 准备环境变量
+### 2. 启动项目
 
-复制示例文件：
+最简方式：
+
+```bash
+docker compose up -d --build
+```
+
+如果你想自定义端口、`SESSION_SECRET` 或数据目录，再按需复制环境变量模板：
 
 ```bash
 cp .env.example .env
 ```
 
-然后修改 `.env`，至少改这两个：
+然后再启动。
 
-```env
-ADMIN_PASSWORD=请改成你自己的强密码
-SESSION_SECRET=请改成一段足够长的随机字符串
-```
+### 首次使用
+
+如果你**没有设置 `ADMIN_PASSWORD`**（默认就是这样），项目首次部署后，打开后台时会先提示你：
+
+- 初始化管理员密码
+- 输入两次自定义密码
+- 初始化成功后自动登录
+
+这更适合给别人直接部署使用，因为仓库里不需要带一个固定默认后台密码。
 
 ---
 
@@ -112,9 +123,11 @@ http://localhost:3000
 |---|---|
 | `NODE_ENV` | 运行环境，生产环境建议 `production` |
 | `PORT` | 服务端口，默认 `3000` |
-| `ADMIN_PASSWORD` | 管理后台密码 |
-| `SESSION_SECRET` | Session 签名密钥，必须改成你自己的随机串 |
+| `SESSION_SECRET` | Session 签名密钥，建议改成你自己的随机串 |
 | `DATA_DIR` | 数据目录，Docker 中默认 `/app/data` |
+
+> 如果只是快速体验，可以连 `.env` 都不配，直接 `docker compose up -d --build`。
+> 如果准备长期使用，建议至少自定义 `SESSION_SECRET`。
 
 ---
 
@@ -404,18 +417,15 @@ docker compose up -d --build
 
 ### 6. 管理员密码忘了怎么办？
 
-直接改 `.env`：
+如果你使用的是 `.env` 固定密码模式，请修改 `.env` 文件里的 `ADMIN_PASSWORD`，然后重建容器。
 
-```env
-ADMIN_PASSWORD=your-new-password
-```
+如果你使用的是首次打开网站时自己设置管理员密码的方式，请按下面步骤处理：
 
-然后重建容器：
+必须：
 
-```bash
-docker compose down
-docker compose up -d --build
-```
+1. 请登录服务器，删掉服务器此项目目录下的 `data/config/admin-auth.json` 文件。
+2. 重启 Docker 后，重新打开网站，即可再次进入“初始化管理员密码”流程。
+
 
 ### 7. Session / 登录总失效怎么办？
 
