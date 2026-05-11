@@ -1,11 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useSize } from '@/hooks/use-size'
 import ImageUploadDialog, { type ImageItem } from './image-upload-dialog'
+
+function normalizePublicImageUrl(url: string) {
+	if (!url) return url
+	let normalized = url.trim()
+	while (normalized.includes('/api/api/')) {
+		normalized = normalized.replaceAll('/api/api/', '/api/')
+	}
+	if (normalized.startsWith('/images/')) {
+		normalized = normalized.replace('/images/', '/api/images/')
+	}
+	return normalized
+}
 
 export interface Project {
 	name: string
@@ -31,6 +43,7 @@ export function ProjectCard({ project, isEditMode = false, onUpdate, onDelete }:
 	const [localProject, setLocalProject] = useState(project)
 	const [showImageDialog, setShowImageDialog] = useState(false)
 	const [imageItem, setImageItem] = useState<ImageItem | null>(null)
+	const displayImageUrl = useMemo(() => normalizePublicImageUrl(localProject.image), [localProject.image])
 
 	const handleFieldChange = (field: keyof Project, value: any) => {
 		const updated = { ...localProject, [field]: value }
@@ -94,7 +107,7 @@ export function ProjectCard({ project, isEditMode = false, onUpdate, onDelete }:
 			<div className='flex items-start gap-4'>
 				<div className='group relative'>
 					<img
-						src={localProject.image}
+						src={displayImageUrl}
 						alt={localProject.name}
 						className={cn('h-16 w-16 shrink-0 rounded-xl object-cover', canEdit && 'cursor-pointer')}
 						onClick={() => canEdit && setShowImageDialog(true)}

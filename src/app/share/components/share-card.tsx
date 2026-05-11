@@ -5,8 +5,20 @@ import StarRating from '@/components/star-rating'
 import { useSize } from '@/hooks/use-size'
 import { cn } from '@/lib/utils'
 import EditableStarRating from '@/components/editable-star-rating'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import LogoUploadDialog, { type LogoItem } from './logo-upload-dialog'
+
+function normalizePublicImageUrl(url: string) {
+	if (!url) return url
+	let normalized = url.trim()
+	while (normalized.includes('/api/api/')) {
+		normalized = normalized.replaceAll('/api/api/', '/api/')
+	}
+	if (normalized.startsWith('/images/')) {
+		normalized = normalized.replace('/images/', '/api/images/')
+	}
+	return normalized
+}
 
 export interface Share {
 	name: string
@@ -31,6 +43,7 @@ export function ShareCard({ share, isEditMode = false, onUpdate, onDelete }: Sha
 	const [localShare, setLocalShare] = useState(share)
 	const [showLogoDialog, setShowLogoDialog] = useState(false)
 	const [logoItem, setLogoItem] = useState<LogoItem | null>(null)
+	const displayLogoUrl = useMemo(() => normalizePublicImageUrl(localShare.logo), [localShare.logo])
 
 	const handleFieldChange = (field: keyof Share, value: any) => {
 		const updated = { ...localShare, [field]: value }
@@ -95,7 +108,7 @@ export function ShareCard({ share, isEditMode = false, onUpdate, onDelete }: Sha
 				<div className='mb-4 flex items-center gap-4'>
 					<div className='group relative'>
 						<img
-							src={localShare.logo}
+							src={displayLogoUrl}
 							alt={localShare.name}
 							className={cn('h-16 w-16 rounded-xl object-cover', canEdit && 'cursor-pointer')}
 							onClick={() => canEdit && setShowLogoDialog(true)}

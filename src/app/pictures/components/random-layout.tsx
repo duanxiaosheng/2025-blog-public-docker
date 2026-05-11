@@ -8,6 +8,18 @@ import siteContent from '@/config/site-content.json'
 import { cn } from '@/lib/utils'
 import { useSize } from '@/hooks/use-size'
 
+function normalizePublicImageUrl(url: string) {
+	if (!url) return url
+	let normalized = url.trim()
+	while (normalized.includes('/api/api/')) {
+		normalized = normalized.replaceAll('/api/api/', '/api/')
+	}
+	if (normalized.startsWith('/images/')) {
+		normalized = normalized.replace('/images/', '/api/images/')
+	}
+	return normalized
+}
+
 interface RandomLayoutProps {
 	pictures: Picture[]
 	isEditMode?: boolean
@@ -55,7 +67,7 @@ const buildUrlList = (pictures: Picture[]): UrlItem[] => {
 	for (const [index, picture] of pictures.entries()) {
 		if (picture.image) {
 			result.push({
-				url: picture.image,
+				url: normalizePublicImageUrl(picture.image),
 				groupIndex: index,
 				description: picture.description,
 				uploadedAt: picture.uploadedAt,
@@ -67,7 +79,7 @@ const buildUrlList = (pictures: Picture[]): UrlItem[] => {
 		if (picture.images && picture.images.length > 0) {
 			result.push(
 				...picture.images.map((url, imageIndex) => ({
-					url,
+					url: normalizePublicImageUrl(url),
 					groupIndex: index,
 					description: picture.description,
 					uploadedAt: picture.uploadedAt,

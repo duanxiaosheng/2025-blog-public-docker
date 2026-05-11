@@ -6,8 +6,20 @@ import { useSize } from '@/hooks/use-size'
 import { cn } from '@/lib/utils'
 import EditableStarRating from '@/components/editable-star-rating'
 import { Blogger, type BloggerStatus } from '../grid-view'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import AvatarUploadDialog, { type AvatarItem } from './avatar-upload-dialog'
+
+function normalizePublicImageUrl(url: string) {
+	if (!url) return url
+	let normalized = url.trim()
+	while (normalized.includes('/api/api/')) {
+		normalized = normalized.replaceAll('/api/api/', '/api/')
+	}
+	if (normalized.startsWith('/images/')) {
+		normalized = normalized.replace('/images/', '/api/images/')
+	}
+	return normalized
+}
 
 interface BloggerCardProps {
 	blogger: Blogger
@@ -23,6 +35,7 @@ export function BloggerCard({ blogger, isEditMode = false, onUpdate, onDelete }:
 	const [localBlogger, setLocalBlogger] = useState(blogger)
 	const [showAvatarDialog, setShowAvatarDialog] = useState(false)
 	const [avatarItem, setAvatarItem] = useState<AvatarItem | null>(null)
+	const displayAvatarUrl = useMemo(() => normalizePublicImageUrl(localBlogger.avatar), [localBlogger.avatar])
 
 	const handleFieldChange = (field: keyof Blogger, value: any) => {
 		const updated = { ...localBlogger, [field]: value }
@@ -79,7 +92,7 @@ export function BloggerCard({ blogger, isEditMode = false, onUpdate, onDelete }:
 				<div className='mb-4 flex items-center gap-4'>
 					<div className='group relative'>
 						<img
-							src={localBlogger.avatar}
+							src={displayAvatarUrl}
 							alt={localBlogger.name}
 							className={cn('h-16 w-16 rounded-full object-cover', canEdit && 'cursor-pointer')}
 							onClick={() => canEdit && setShowAvatarDialog(true)}
