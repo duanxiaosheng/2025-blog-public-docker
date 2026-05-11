@@ -19,7 +19,7 @@ docker compose up -d --build
 ### GitHub 地址
 
 ```bash
-git clone https://gitee.com/duanxiaosheng/2025-blog-public-docker.git
+git clone https://github.com/duanxiaosheng/2025-blog-public-docker.git
 cd 2025-blog-public-docker
 docker compose up -d --build
 ```
