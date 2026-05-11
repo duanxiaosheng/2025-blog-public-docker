@@ -1,7 +1,7 @@
 services:
   blog:
     build: .
-    container_name: 2025-blog-local
+    container_name: 2025-blog-local-docker
     ports:
       - "${PORT:-3000}:3000"
     environment:
