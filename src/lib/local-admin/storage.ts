@@ -91,18 +91,31 @@ async function seedIfMissing(target: string, source: string, kind: 'dir' | 'file
 	}
 }
 
+async function seedJsonIfMissing(filePath: string, data: unknown) {
+	if (await exists(filePath)) return
+	await writeJsonFile(filePath, data)
+}
+
 let initialized = false
 
 export async function ensureDataSeeded() {
 	if (initialized) return
 	await ensureDir(DATA_DIR)
-	await seedIfMissing(BLOGS_DIR, path.join(SOURCE_PUBLIC_DIR, 'blogs'), 'dir')
-	await seedIfMissing(path.join(CONTENT_DIR, 'about.json'), path.join(SOURCE_CONTENT_DIR, 'about', 'list.json'), 'file')
-	await seedIfMissing(path.join(CONTENT_DIR, 'projects.json'), path.join(SOURCE_CONTENT_DIR, 'projects', 'list.json'), 'file')
-	await seedIfMissing(path.join(CONTENT_DIR, 'share.json'), path.join(SOURCE_CONTENT_DIR, 'share', 'list.json'), 'file')
-	await seedIfMissing(path.join(CONTENT_DIR, 'snippets.json'), path.join(SOURCE_CONTENT_DIR, 'snippets', 'list.json'), 'file')
-	await seedIfMissing(path.join(CONTENT_DIR, 'bloggers.json'), path.join(SOURCE_CONTENT_DIR, 'bloggers', 'list.json'), 'file')
-	await seedIfMissing(path.join(CONTENT_DIR, 'pictures.json'), path.join(SOURCE_CONTENT_DIR, 'pictures', 'list.json'), 'file')
+	await ensureDir(BLOGS_DIR)
+	await ensureDir(CONTENT_DIR)
+	await ensureDir(CONFIG_DIR)
+	await ensureDir(IMAGES_DIR)
+
+	await seedJsonIfMissing(path.join(BLOGS_DIR, 'index.json'), [])
+	await seedJsonIfMissing(path.join(BLOGS_DIR, 'categories.json'), { categories: [] })
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'about.json'), { title: '', description: '', content: '' })
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'projects.json'), [])
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'share.json'), [])
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'snippets.json'), [])
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'bloggers.json'), [])
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'pictures.json'), [])
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'likes.json'), { counts: {} })
+
 	await seedIfMissing(path.join(CONFIG_DIR, 'site-content.json'), path.join(SOURCE_CONFIG_DIR, 'site-content.json'), 'file')
 	await seedIfMissing(path.join(CONFIG_DIR, 'card-styles.json'), path.join(SOURCE_CONFIG_DIR, 'card-styles.json'), 'file')
 	initialized = true
