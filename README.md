@@ -9,7 +9,7 @@
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/duanxiaosheng/2025-blog-public-docker.git
+git clone https://gitee.com/duanxiaosheng/2025-blog-public-docker.git
 cd 2025-blog-public-docker
 ```
 
