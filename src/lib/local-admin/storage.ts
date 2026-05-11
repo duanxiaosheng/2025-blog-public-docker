@@ -91,6 +91,53 @@ async function seedIfMissing(target: string, source: string, kind: 'dir' | 'file
 	}
 }
 
+const DEFAULT_ABOUT = {
+	title: '关于本站',
+	description: '这里可以介绍你的网站、作者和内容方向。',
+	content: '这里是关于本站的默认说明。\n\n你可以登录管理员后台后，在关于页面编辑这段内容，换成你自己的介绍。'
+}
+
+const DEFAULT_PROJECTS = [
+	{
+		name: '示例项目',
+		year: new Date().getFullYear(),
+		description: '这里可以展示你的近期项目。你可以编辑或删除这个示例，然后添加自己的项目。',
+		image: '/images/blockies.svg',
+		url: '/',
+		tags: ['说明']
+	}
+]
+
+const DEFAULT_SHARE = [
+	{
+		name: '示例推荐',
+		url: '/',
+		logo: '/images/blockies.svg',
+		description: '这里可以放你推荐的网站、工具或资源。你可以编辑或删除这个示例。',
+		tags: ['说明'],
+		stars: 3
+	}
+]
+
+const DEFAULT_BLOGGERS = [
+	{
+		name: '示例博客',
+		url: '/',
+		avatar: '/images/avatar.png',
+		description: '这里可以收藏你喜欢的博客或作者。你可以编辑或删除这个示例。',
+		stars: 3
+	}
+]
+
+const DEFAULT_PICTURES = [
+	{
+		id: 'getting-started',
+		uploadedAt: '2026-01-01T00:00:00.000Z',
+		description: '这里是图片集页面。进入编辑模式后可以上传自己的图片，上传后会保存到本地数据目录。',
+		images: ['/images/art/cat.png']
+	}
+]
+
 async function seedJsonIfMissing(filePath: string, data: unknown) {
 	if (await exists(filePath)) return
 	await writeJsonFile(filePath, data)
@@ -106,14 +153,24 @@ export async function ensureDataSeeded() {
 	await ensureDir(CONFIG_DIR)
 	await ensureDir(IMAGES_DIR)
 
-	await seedJsonIfMissing(path.join(BLOGS_DIR, 'index.json'), [])
-	await seedJsonIfMissing(path.join(BLOGS_DIR, 'categories.json'), { categories: [] })
-	await seedJsonIfMissing(path.join(CONTENT_DIR, 'about.json'), { title: '', description: '', content: '' })
-	await seedJsonIfMissing(path.join(CONTENT_DIR, 'projects.json'), [])
-	await seedJsonIfMissing(path.join(CONTENT_DIR, 'share.json'), [])
+	await seedIfMissing(BLOGS_DIR, path.join(SOURCE_PUBLIC_DIR, 'blogs'), 'dir')
+	await seedJsonIfMissing(path.join(BLOGS_DIR, 'index.json'), [
+		{
+			slug: 'getting-started',
+			title: '欢迎使用',
+			date: '2026-01-01T00:00:00.000Z',
+			tags: ['说明'],
+			summary: '这是一篇默认说明文章，你可以编辑或删除它。',
+			category: '说明'
+		}
+	])
+	await seedJsonIfMissing(path.join(BLOGS_DIR, 'categories.json'), { categories: ['说明'] })
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'about.json'), DEFAULT_ABOUT)
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'projects.json'), DEFAULT_PROJECTS)
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'share.json'), DEFAULT_SHARE)
 	await seedJsonIfMissing(path.join(CONTENT_DIR, 'snippets.json'), [])
-	await seedJsonIfMissing(path.join(CONTENT_DIR, 'bloggers.json'), [])
-	await seedJsonIfMissing(path.join(CONTENT_DIR, 'pictures.json'), [])
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'bloggers.json'), DEFAULT_BLOGGERS)
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'pictures.json'), DEFAULT_PICTURES)
 	await seedJsonIfMissing(path.join(CONTENT_DIR, 'likes.json'), { counts: {} })
 
 	await seedIfMissing(path.join(CONFIG_DIR, 'site-content.json'), path.join(SOURCE_CONFIG_DIR, 'site-content.json'), 'file')
