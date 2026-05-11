@@ -1,0 +1,17 @@
+services:
+  blog:
+    build: .
+    container_name: 2025-blog-local
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+      DATA_DIR: ${DATA_DIR:-/app/data}
+    volumes:
+      - ./data:${DATA_DIR:-/app/data}
+    restart: unless-stopped
