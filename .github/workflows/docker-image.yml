@@ -25,11 +25,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/duanxiaosheng/2025-blog-public-docker
+          images: |
+            ghcr.io/duanxiaosheng/2025-blog-public-docker
+            duanxiaosheng/2025-blog-public-docker
           tags: |
             type=raw,value=latest
             type=sha
