@@ -153,7 +153,7 @@ export async function ensureDataSeeded() {
 	await ensureDir(CONFIG_DIR)
 	await ensureDir(IMAGES_DIR)
 
-	await seedIfMissing(BLOGS_DIR, path.join(SOURCE_PUBLIC_DIR, 'blogs'), 'dir')
+	await seedIfMissing(path.join(BLOGS_DIR, 'getting-started'), path.join(SOURCE_PUBLIC_DIR, 'blogs', 'getting-started'), 'dir')
 	await seedJsonIfMissing(path.join(BLOGS_DIR, 'index.json'), [
 		{
 			slug: 'getting-started',
