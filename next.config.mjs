@@ -1,4 +1,5 @@
 const nextConfig = {
+	output: 'standalone',
 	devIndicators: false,
 	reactStrictMode: false,
 	reactCompiler: true,
