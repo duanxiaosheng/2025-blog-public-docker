@@ -163,6 +163,25 @@ tar -czf blog-data-backup.tar.gz data
 - `README.local.md`
 - `BAOTA-DEPLOY.md`
 
+## 数据健康检查
+
+项目内置了一个轻量检查脚本，用来提前发现图片路径、脏数据和文章索引问题：
+
+```bash
+npm run check:data
+```
+
+它会检查：
+
+- JSON / markdown 中是否混入 `blob:` 或 `data:image` 临时地址
+- 存储层是否错误保存了 `/api/images/...`、`/api/blogs/...`
+- 本地图片引用是否真实存在
+- 文章 `index.json` 是否引用了不存在的文章目录
+- markdown 中是否出现 `/api/api/` 重复路径
+- favicon/avatar fallback 资源是否存在
+
+建议每次修改图片、文章、内容读写逻辑后都跑一次。
+
 ## 宝塔部署
 
 详细步骤见：
