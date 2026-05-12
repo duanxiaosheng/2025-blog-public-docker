@@ -1,5 +1,6 @@
-import { mkdir, readFile, readdir, rm, stat, writeFile, copyFile } from 'fs/promises'
+import { copyFile, mkdir, open, readFile, readdir, rename, rm, stat } from 'fs/promises'
 import path from 'path'
+import { randomUUID } from 'crypto'
 
 export type BlogIndexItem = {
 	slug: string
@@ -61,9 +62,42 @@ async function readJsonFile<T>(filePath: string, fallback: T): Promise<T> {
 	}
 }
 
-async function writeJsonFile(filePath: string, data: unknown) {
+async function atomicWriteFile(filePath: string, data: string | Buffer) {
 	await ensureDir(path.dirname(filePath))
-	await writeFile(filePath, JSON.stringify(data, null, '\t'), 'utf8')
+	const dir = path.dirname(filePath)
+	const base = path.basename(filePath)
+	const tmpPath = path.join(dir, `.${base}.${process.pid}.${Date.now()}.${randomUUID()}.tmp`)
+	let handle: Awaited<ReturnType<typeof open>> | null = null
+	try {
+		handle = await open(tmpPath, 'w')
+		await handle.writeFile(data)
+		await handle.sync()
+		await handle.close()
+		handle = null
+		await rename(tmpPath, filePath)
+		try {
+			const dirHandle = await open(dir, 'r')
+			try {
+				await dirHandle.sync()
+			} finally {
+				await dirHandle.close()
+			}
+		} catch {
+			// Some filesystems do not allow syncing directories. The rename still gives atomic replacement semantics.
+		}
+	} catch (error) {
+		if (handle) {
+			try {
+				await handle.close()
+			} catch {}
+		}
+		await rm(tmpPath, { force: true }).catch(() => {})
+		throw error
+	}
+}
+
+async function writeJsonFile(filePath: string, data: unknown) {
+	await atomicWriteFile(filePath, JSON.stringify(data, null, '\t'))
 }
 
 async function copyDirRecursive(src: string, dest: string) {
@@ -224,7 +258,7 @@ export async function saveBlog(params: { slug: string; originalSlug?: string | n
 	}
 	await ensureDir(targetDir)
 	await writeJsonFile(path.join(targetDir, 'config.json'), config)
-	await writeFile(path.join(targetDir, 'index.md'), markdown, 'utf8')
+	await atomicWriteFile(path.join(targetDir, 'index.md'), markdown)
 }
 
 export async function deleteBlog(slug: string) {
@@ -255,15 +289,13 @@ export async function writeConfigJson(name: string, data: unknown) {
 export async function savePublicAsset(relativePath: string, contentBase64: string) {
 	await ensureDataSeeded()
 	const filePath = path.join(PUBLIC_DIR, relativePath.replace(/^\//, ''))
-	await ensureDir(path.dirname(filePath))
-	await writeFile(filePath, Buffer.from(contentBase64, 'base64'))
+	await atomicWriteFile(filePath, Buffer.from(contentBase64, 'base64'))
 }
 
 export async function savePublicAssetBuffer(relativePath: string, buffer: Buffer) {
 	await ensureDataSeeded()
 	const filePath = path.join(PUBLIC_DIR, relativePath.replace(/^\//, ''))
-	await ensureDir(path.dirname(filePath))
-	await writeFile(filePath, buffer)
+	await atomicWriteFile(filePath, buffer)
 }
 
 export async function deletePublicAsset(relativePath: string) {
