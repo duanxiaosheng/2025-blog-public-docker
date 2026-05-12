@@ -55,7 +55,7 @@ export function FaviconAvatarUpload({ faviconItem, setFaviconItem, avatarItem, s
 					{faviconItem?.type === 'file' ? (
 						<img src={faviconItem.previewUrl} alt='favicon preview' className='h-full w-full object-cover' />
 					) : (
-						<img src='/favicon.png' alt='current favicon' className='h-full w-full object-cover' />
+						<img src='/api/images/favicon.png' alt='current favicon' className='h-full w-full object-cover' />
 					)}
 					<div className='pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
 						<span className='text-xs text-white'>{faviconItem ? '更换' : '上传'}</span>

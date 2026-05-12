@@ -92,6 +92,19 @@ export default function ConfigDialog({ open, onClose }: ConfigDialogProps) {
 				socialButtonImageUploads
 			)
 			await refreshRemoteConfig()
+			if (typeof document !== 'undefined') {
+				const cacheBust = Date.now().toString()
+				if (faviconItem?.type === 'file') {
+					document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]').forEach(link => {
+						link.href = `/api/images/favicon.png?v=${cacheBust}`
+					})
+				}
+				if (avatarItem?.type === 'file') {
+					document.querySelectorAll<HTMLImageElement>('img[src^="/api/images/avatar.png"], img[src*="/api/images/avatar.png"]').forEach(img => {
+						img.src = `/api/images/avatar.png?v=${cacheBust}`
+					})
+				}
+			}
 			updateThemeVariables(formData.theme)
 			setFaviconItem(null)
 			setAvatarItem(null)

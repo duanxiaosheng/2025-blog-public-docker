@@ -46,7 +46,7 @@ export async function pushSiteContent(
 	const removals: string[] = []
 
 	if (faviconItem?.type === 'file') {
-		uploads.push({ relativePath: '/favicon.png', contentBase64: await fileToBase64NoPrefix(faviconItem.file) })
+		uploads.push({ relativePath: '/images/favicon.png', contentBase64: await fileToBase64NoPrefix(faviconItem.file) })
 	}
 	if (avatarItem?.type === 'file') {
 		uploads.push({ relativePath: '/images/avatar.png', contentBase64: await fileToBase64NoPrefix(avatarItem.file) })

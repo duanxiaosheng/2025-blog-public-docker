@@ -1,7 +1,6 @@
 'use client'
 
 import Card from '@/components/card'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
@@ -141,7 +140,7 @@ export default function NavCard() {
 					)}
 
 					<Link className='flex items-center gap-3' href='/'>
-						<Image src={AVATAR_URL} alt='avatar' width={40} height={40} style={{ boxShadow: ' 0 12px 20px -5px #E2D9CE' }} className='rounded-full' />
+						<img src={AVATAR_URL} alt='avatar' width={40} height={40} style={{ boxShadow: ' 0 12px 20px -5px #E2D9CE' }} className='rounded-full' />
 						{form === 'full' && <span className='font-averia mt-1 text-2xl leading-none font-medium'>{siteContent.meta.title}</span>}
 						{form === 'full' && <span className='text-brand mt-2 text-xs font-medium'>(开发中)</span>}
 					</Link>

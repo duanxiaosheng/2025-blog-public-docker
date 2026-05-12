@@ -33,10 +33,11 @@ export async function GET(_: Request, context: { params: Promise<{ path: string[
 	const sourceFilePath = path.join(SOURCE_PUBLIC_DIR, 'images', ...parts)
 	try {
 		const buffer = await readFile(dataFilePath)
+		const isMutableSiteImage = parts.length === 1 && (parts[0] === 'avatar.png' || parts[0] === 'favicon.png')
 		return new NextResponse(buffer, {
 			headers: {
 				'Content-Type': getContentType(dataFilePath),
-				'Cache-Control': 'public, max-age=31536000, immutable'
+				'Cache-Control': isMutableSiteImage ? 'no-store, max-age=0' : 'public, max-age=31536000, immutable'
 			}
 		})
 	} catch {
@@ -45,7 +46,7 @@ export async function GET(_: Request, context: { params: Promise<{ path: string[
 			return new NextResponse(buffer, {
 				headers: {
 					'Content-Type': getContentType(sourceFilePath),
-					'Cache-Control': 'public, max-age=31536000, immutable'
+					'Cache-Control': parts.length === 1 && (parts[0] === 'avatar.png' || parts[0] === 'favicon.png') ? 'no-store, max-age=0' : 'public, max-age=31536000, immutable'
 				}
 			})
 		} catch {
