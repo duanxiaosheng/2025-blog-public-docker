@@ -1,17 +1,17 @@
+import { publicImageDisplayPath, publicImageStoredPath } from './assets'
+
 function normalizeDisplayUrl(value: string) {
 	if (!value) return value
-	let next = value.replace(/^\/api(?:\/api)+\/images\//, '/api/images/')
-	if (next.startsWith('/images/')) return `/api${next}`
-	return next
+	const next = value.replace(/^\/api(?:\/api)+\/images\//, '/api/images/')
+	return publicImageDisplayPath(next)
 }
 
 function normalizeStorageUrl(value: string) {
 	if (!value) return value
-	let next = value.replace(/^\/api(?:\/api)+\/images\//, '/api/images/')
-	if (next.startsWith('/api/images/')) return next.replace('/api/images/', '/images/')
+	const next = value.replace(/^\/api(?:\/api)+\/images\//, '/api/images/')
 	if (next.startsWith('/api/site-assets/avatar')) return '/images/avatar.png'
 	if (next.startsWith('/api/site-assets/favicon')) return '/images/favicon.png'
-	return next
+	return publicImageStoredPath(next)
 }
 
 function mapDeep(value: unknown, mapper: (value: string) => string): unknown {

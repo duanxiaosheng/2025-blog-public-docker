@@ -1,7 +1,5 @@
-import { NextResponse } from 'next/server'
-import { readContentJson } from '@/lib/local-admin/storage'
-import { normalizePublicImagesForDisplay } from '@/lib/local-admin/public-image-paths'
+import { collectionJson, readCollection } from '@/lib/local-admin/content-repository'
 
 export async function GET() {
-	return NextResponse.json(normalizePublicImagesForDisplay(await readContentJson('share.json', [])))
+	return collectionJson(await readCollection('share'))
 }

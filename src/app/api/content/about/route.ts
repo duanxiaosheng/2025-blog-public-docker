@@ -1,7 +1,5 @@
-import { NextResponse } from 'next/server'
-import { readContentJson } from '@/lib/local-admin/storage'
+import { collectionJson, readCollection } from '@/lib/local-admin/content-repository'
 
 export async function GET() {
-	const data = await readContentJson('about.json', { title: '', description: '', content: '' })
-	return NextResponse.json(data)
+	return collectionJson(await readCollection('about'))
 }
