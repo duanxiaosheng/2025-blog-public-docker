@@ -51,11 +51,18 @@ export default function Page() {
 		setIsCreateDialogOpen(true)
 	}
 
-	const handleSaveProject = (updatedProject: Project) => {
+	const handleSaveProject = (updatedProject: Project, imageItem?: ImageItem) => {
 		if (editingProject) {
 			setProjects(projects.map(p => (p.url === editingProject.url ? updatedProject : p)))
 		} else {
 			setProjects([...projects, updatedProject])
+		}
+		if (imageItem) {
+			setImageItems(prev => {
+				const newMap = new Map(prev)
+				newMap.set(updatedProject.url, imageItem)
+				return newMap
+			})
 		}
 	}
 

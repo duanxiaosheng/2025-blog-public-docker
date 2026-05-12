@@ -17,7 +17,7 @@ interface Blogger {
 interface CreateDialogProps {
 	blogger: Blogger | null
 	onClose: () => void
-	onSave: (blogger: Blogger) => void
+	onSave: (blogger: Blogger, avatarItem?: AvatarItem) => void
 }
 
 export default function CreateDialog({ blogger, onClose, onSave }: CreateDialogProps) {
@@ -29,10 +29,12 @@ export default function CreateDialog({ blogger, onClose, onSave }: CreateDialogP
 		stars: 3
 	})
 	const [showAvatarDialog, setShowAvatarDialog] = useState(false)
+	const [selectedAvatarItem, setSelectedAvatarItem] = useState<AvatarItem | null>(null)
 
 	useEffect(() => {
 		if (blogger) {
 			setFormData(blogger)
+			setSelectedAvatarItem(null)
 		} else {
 			setFormData({
 				name: '',
@@ -41,10 +43,12 @@ export default function CreateDialog({ blogger, onClose, onSave }: CreateDialogP
 				description: '',
 				stars: 3
 			})
+			setSelectedAvatarItem(null)
 		}
 	}, [blogger])
 
 	const handleAvatarSubmit = (avatar: AvatarItem) => {
+		setSelectedAvatarItem(avatar)
 		const avatarUrl = avatar.type === 'url' ? avatar.url : avatar.previewUrl
 		setFormData({ ...formData, avatar: avatarUrl })
 	}
@@ -55,7 +59,7 @@ export default function CreateDialog({ blogger, onClose, onSave }: CreateDialogP
 			return
 		}
 
-		onSave(formData)
+		onSave(formData, selectedAvatarItem || undefined)
 		onClose()
 		toast.success(blogger ? '更新成功' : '添加成功')
 	}
