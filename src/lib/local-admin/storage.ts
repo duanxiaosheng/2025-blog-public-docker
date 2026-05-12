@@ -220,6 +220,20 @@ export function getPublicDir() {
 	return PUBLIC_DIR
 }
 
+export function getBlogsDir() {
+	return BLOGS_DIR
+}
+
+export async function removePublicAsset(relativePath: string) {
+	await ensureDataSeeded()
+	const filePath = path.resolve(PUBLIC_DIR, relativePath.replace(/^\//, ''))
+	const publicRoot = path.resolve(PUBLIC_DIR)
+	if (filePath !== publicRoot && !filePath.startsWith(`${publicRoot}${path.sep}`)) {
+		throw new Error('非法资源路径')
+	}
+	await rm(filePath, { force: true })
+}
+
 export async function getBlogIndex() {
 	await ensureDataSeeded()
 	return readJsonFile<BlogIndexItem[]>(path.join(BLOGS_DIR, 'index.json'), [])

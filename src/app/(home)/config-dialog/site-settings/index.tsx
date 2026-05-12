@@ -9,6 +9,7 @@ import { BackgroundImagesSection } from './background-images-section'
 import { SocialButtonsSection } from './social-buttons-section'
 import { HatSection } from './hat-section'
 import { BeianForm } from './beian-form'
+import { AssetCleanerSection } from './asset-cleaner-section'
 
 export type { FileItem, ArtImageUploads, BackgroundImageUploads, SocialButtonImageUploads } from './types'
 
@@ -48,6 +49,8 @@ export function SiteSettings({
 			<SiteMetaForm formData={formData} setFormData={setFormData} />
 
 			<BeianForm formData={formData} setFormData={setFormData} />
+
+			<AssetCleanerSection />
 
 			<SocialButtonsSection
 				formData={formData}
