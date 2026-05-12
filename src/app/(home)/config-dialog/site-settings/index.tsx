@@ -26,6 +26,7 @@ interface SiteSettingsProps {
 	setBackgroundImageUploads: React.Dispatch<React.SetStateAction<BackgroundImageUploads>>
 	socialButtonImageUploads: SocialButtonImageUploads
 	setSocialButtonImageUploads: React.Dispatch<React.SetStateAction<SocialButtonImageUploads>>
+	onAssetsChanged?: () => Promise<void> | void
 }
 
 export function SiteSettings({
@@ -40,7 +41,8 @@ export function SiteSettings({
 	backgroundImageUploads,
 	setBackgroundImageUploads,
 	socialButtonImageUploads,
-	setSocialButtonImageUploads
+	setSocialButtonImageUploads,
+	onAssetsChanged
 }: SiteSettingsProps) {
 	return (
 		<div className='space-y-6'>
@@ -50,7 +52,7 @@ export function SiteSettings({
 
 			<BeianForm formData={formData} setFormData={setFormData} />
 
-			<AssetCleanerSection />
+			<AssetCleanerSection onAssetsChanged={onAssetsChanged} />
 
 			<SocialButtonsSection
 				formData={formData}

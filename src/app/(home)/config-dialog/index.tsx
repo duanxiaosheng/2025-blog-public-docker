@@ -162,6 +162,18 @@ export default function ConfigDialog({ open, onClose }: ConfigDialogProps) {
 		onClose()
 	}
 
+	const syncSiteContentFromRemote = async () => {
+		await refreshRemoteConfig()
+		const latest = useConfigStore.getState().siteContent
+		setFormData({ ...latest })
+		setOriginalData({ ...latest })
+		setArtImageUploads({})
+		setBackgroundImageUploads({})
+		setSocialButtonImageUploads({})
+		setFaviconItem(null)
+		setAvatarItem(null)
+	}
+
 	const buttonText = isAuth ? '保存' : '请先登录'
 	const tabs: { id: TabType; label: string }[] = [
 		{ id: 'site', label: '网站设置' },
@@ -188,7 +200,7 @@ export default function ConfigDialog({ open, onClose }: ConfigDialogProps) {
 				</div>
 			</div>
 			<div className='min-h-[200px]'>
-				{activeTab === 'site' && <SiteSettings formData={formData} setFormData={setFormData} faviconItem={faviconItem} setFaviconItem={setFaviconItem} avatarItem={avatarItem} setAvatarItem={setAvatarItem} artImageUploads={artImageUploads} setArtImageUploads={setArtImageUploads} backgroundImageUploads={backgroundImageUploads} setBackgroundImageUploads={setBackgroundImageUploads} socialButtonImageUploads={socialButtonImageUploads} setSocialButtonImageUploads={setSocialButtonImageUploads} />}
+				{activeTab === 'site' && <SiteSettings formData={formData} setFormData={setFormData} faviconItem={faviconItem} setFaviconItem={setFaviconItem} avatarItem={avatarItem} setAvatarItem={setAvatarItem} artImageUploads={artImageUploads} setArtImageUploads={setArtImageUploads} backgroundImageUploads={backgroundImageUploads} setBackgroundImageUploads={setBackgroundImageUploads} socialButtonImageUploads={socialButtonImageUploads} setSocialButtonImageUploads={setSocialButtonImageUploads} onAssetsChanged={syncSiteContentFromRemote} />}
 				{activeTab === 'color' && <ColorConfig formData={formData} setFormData={setFormData} />}
 				{activeTab === 'layout' && <HomeLayout cardStylesData={cardStylesData} setCardStylesData={setCardStylesData} onClose={onClose} />}
 			</div>

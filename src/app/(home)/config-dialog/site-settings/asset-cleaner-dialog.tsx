@@ -61,9 +61,10 @@ function badgeClass(asset: AssetItem) {
 interface AssetCleanerDialogProps {
 	open: boolean
 	onClose: () => void
+	onAssetsChanged?: () => Promise<void> | void
 }
 
-export function AssetCleanerDialog({ open, onClose }: AssetCleanerDialogProps) {
+export function AssetCleanerDialog({ open, onClose, onAssetsChanged }: AssetCleanerDialogProps) {
 	const [loading, setLoading] = useState(false)
 	const [deleting, setDeleting] = useState(false)
 	const [editMode, setEditMode] = useState(false)
@@ -141,6 +142,9 @@ export function AssetCleanerDialog({ open, onClose }: AssetCleanerDialogProps) {
 			setData({ assets: body.assets, summary: body.summary })
 			setSelected(new Set())
 			setFailedImages(new Set())
+			if (onAssetsChanged) {
+				await onAssetsChanged()
+			}
 			const skipped = Array.isArray(body.skipped) ? body.skipped.length : 0
 			toast.success(`已删除 ${body.deleted?.length || 0} 张图片${skipped ? `，跳过 ${skipped} 张` : ''}`)
 		} catch (error: any) {
