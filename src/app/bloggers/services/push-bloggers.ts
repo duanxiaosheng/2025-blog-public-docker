@@ -8,7 +8,7 @@ export type PushBloggersParams = {
 	avatarItems?: Map<string, AvatarItem>
 }
 
-export async function pushBloggers(params: PushBloggersParams): Promise<void> {
+export async function prepareBloggersForSave(params: PushBloggersParams): Promise<Blogger[]> {
 	const nextBloggers = await Promise.all(
 		params.bloggers.map(async blogger => {
 			const item = params.avatarItems?.get(blogger.url)
@@ -18,6 +18,11 @@ export async function pushBloggers(params: PushBloggersParams): Promise<void> {
 		})
 	)
 	assertNoBlobImageUrls(nextBloggers, ['avatar'])
+	return nextBloggers
+}
+
+export async function pushBloggers(params: PushBloggersParams): Promise<Blogger[]> {
+	const nextBloggers = await prepareBloggersForSave(params)
 
 	const res = await fetch('/api/admin/bloggers', {
 		method: 'POST',
@@ -29,4 +34,5 @@ export async function pushBloggers(params: PushBloggersParams): Promise<void> {
 		throw new Error(body?.error || '保存失败')
 	}
 	toast.success('发布成功！')
+	return nextBloggers
 }

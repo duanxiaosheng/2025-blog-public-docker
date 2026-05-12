@@ -8,7 +8,7 @@ export type PushPicturesParams = {
 	imageItems?: Map<string, ImageItem>
 }
 
-export async function pushPictures(params: PushPicturesParams): Promise<void> {
+export async function preparePicturesForSave(params: PushPicturesParams): Promise<Picture[]> {
 	const nextPictures = await Promise.all(
 		params.pictures.map(async picture => {
 			const next = { ...picture }
@@ -30,6 +30,11 @@ export async function pushPictures(params: PushPicturesParams): Promise<void> {
 		})
 	)
 	assertNoBlobImageUrls(nextPictures, ['image', 'images'])
+	return nextPictures
+}
+
+export async function pushPictures(params: PushPicturesParams): Promise<Picture[]> {
+	const nextPictures = await preparePicturesForSave(params)
 
 	const res = await fetch('/api/admin/pictures', {
 		method: 'POST',
@@ -41,4 +46,5 @@ export async function pushPictures(params: PushPicturesParams): Promise<void> {
 		throw new Error(body?.error || '保存失败')
 	}
 	toast.success('发布成功！')
+	return nextPictures
 }

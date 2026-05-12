@@ -8,7 +8,7 @@ export type PushProjectsParams = {
 	imageItems?: Map<string, ImageItem>
 }
 
-export async function pushProjects(params: PushProjectsParams): Promise<void> {
+export async function prepareProjectsForSave(params: PushProjectsParams): Promise<Project[]> {
 	const nextProjects = await Promise.all(
 		params.projects.map(async project => {
 			const item = params.imageItems?.get(project.url)
@@ -18,6 +18,11 @@ export async function pushProjects(params: PushProjectsParams): Promise<void> {
 		})
 	)
 	assertNoBlobImageUrls(nextProjects, ['image'])
+	return nextProjects
+}
+
+export async function pushProjects(params: PushProjectsParams): Promise<Project[]> {
+	const nextProjects = await prepareProjectsForSave(params)
 
 	const res = await fetch('/api/admin/projects', {
 		method: 'POST',
@@ -29,4 +34,5 @@ export async function pushProjects(params: PushProjectsParams): Promise<void> {
 		throw new Error(body?.error || '保存失败')
 	}
 	toast.success('发布成功！')
+	return nextProjects
 }

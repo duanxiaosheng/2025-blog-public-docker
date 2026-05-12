@@ -8,7 +8,7 @@ export type PushSharesParams = {
 	logoItems?: Map<string, LogoItem>
 }
 
-export async function pushShares(params: PushSharesParams): Promise<void> {
+export async function prepareSharesForSave(params: PushSharesParams): Promise<Share[]> {
 	const nextShares = await Promise.all(
 		params.shares.map(async share => {
 			const item = params.logoItems?.get(share.url)
@@ -18,6 +18,11 @@ export async function pushShares(params: PushSharesParams): Promise<void> {
 		})
 	)
 	assertNoBlobImageUrls(nextShares, ['logo'])
+	return nextShares
+}
+
+export async function pushShares(params: PushSharesParams): Promise<Share[]> {
+	const nextShares = await prepareSharesForSave(params)
 
 	const res = await fetch('/api/admin/share', {
 		method: 'POST',
@@ -29,4 +34,5 @@ export async function pushShares(params: PushSharesParams): Promise<void> {
 		throw new Error(body?.error || '保存失败')
 	}
 	toast.success('发布成功！')
+	return nextShares
 }

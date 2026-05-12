@@ -83,8 +83,9 @@ export default function Page() {
 	const handleSave = async () => {
 		setIsSaving(true)
 		try {
-			await pushProjects({ projects, imageItems })
-			setOriginalProjects(projects)
+			const savedProjects = await pushProjects({ projects, imageItems })
+			setProjects(savedProjects)
+			setOriginalProjects(savedProjects)
 			setImageItems(new Map())
 			setIsEditMode(false)
 			toast.success('保存成功！')

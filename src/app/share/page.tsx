@@ -84,8 +84,9 @@ export default function Page() {
 	const handleSave = async () => {
 		setIsSaving(true)
 		try {
-			await pushShares({ shares, logoItems })
-			setOriginalShares(shares)
+			const savedShares = await pushShares({ shares, logoItems })
+			setShares(savedShares)
+			setOriginalShares(savedShares)
 			setLogoItems(new Map())
 			setIsEditMode(false)
 			toast.success('保存成功！')

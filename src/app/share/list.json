@@ -252,15 +252,5 @@
 			"3D"
 		],
 		"stars": 4
-	},
-	{
-		"name": "Tearable UI",
-		"logo": "blob:https://www.yysuni.com/eb24e1ef-6988-4e8f-9915-51ab70a5fcd0",
-		"url": "https://pushmatrix.github.io/tearable/",
-		"description": "将页面交互，变成一张张可以撕破的画布",
-		"tags": [
-			"3D"
-		],
-		"stars": 3
 	}
 ]

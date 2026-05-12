@@ -83,8 +83,9 @@ export default function Page() {
 	const handleSave = async () => {
 		setIsSaving(true)
 		try {
-			await pushBloggers({ bloggers, avatarItems })
-			setOriginalBloggers(bloggers)
+			const savedBloggers = await pushBloggers({ bloggers, avatarItems })
+			setBloggers(savedBloggers)
+			setOriginalBloggers(savedBloggers)
 			setAvatarItems(new Map())
 			setIsEditMode(false)
 			toast.success('保存成功！')
