@@ -1,5 +1,6 @@
 'use client'
 
+import { Search, X } from 'lucide-react'
 import { useState } from 'react'
 
 import { type LogoItem } from './components/logo-upload-dialog'
@@ -27,13 +28,25 @@ export default function GridView({ shares, isEditMode = false, onUpdate, onDelet
 	return (
 		<div className='mx-auto w-full max-w-7xl px-6 pt-24 pb-12'>
 			<div className='mb-8 space-y-4'>
-				<input
-					type='text'
-					placeholder='搜索资源...'
-					value={searchTerm}
-					onChange={e => setSearchTerm(e.target.value)}
-					className='focus:ring-brand mx-auto block w-full max-w-md rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:outline-none'
-				/>
+				<div className='group relative mx-auto w-full max-w-md'>
+					<Search className='text-secondary pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 transition-colors group-focus-within:text-brand' />
+					<input
+						type='text'
+						placeholder='搜索资源名称或简介'
+						value={searchTerm}
+						onChange={e => setSearchTerm(e.target.value)}
+						className='bg-card/75 placeholder:text-secondary/60 focus:border-brand/40 focus:ring-brand/15 h-12 w-full rounded-2xl border border-white/60 pr-11 pl-11 text-sm shadow-sm backdrop-blur-xl transition-all outline-none focus:bg-white/90 focus:ring-4'
+					/>
+					{searchTerm && (
+						<button
+							type='button'
+							onClick={() => setSearchTerm('')}
+							className='text-secondary hover:text-primary absolute top-1/2 right-3 flex size-7 -translate-y-1/2 items-center justify-center rounded-full transition-colors hover:bg-black/5'
+							aria-label='清空搜索'>
+							<X className='size-3.5' />
+						</button>
+					)}
+				</div>
 
 				<div className='flex flex-wrap justify-center gap-2'>
 					<button

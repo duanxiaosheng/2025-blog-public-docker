@@ -28,7 +28,7 @@ export function BlogPreview({ markdown, title, tags, date, summary, cover, slug 
 	}
 
 	return (
-		<div className='mx-auto flex max-w-[1140px] justify-center gap-6 px-6 pt-28 pb-12 max-sm:px-0'>
+		<div className='mx-auto flex max-w-[1140px] justify-center gap-6 px-6 pt-28 pb-12'>
 			<motion.article
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
