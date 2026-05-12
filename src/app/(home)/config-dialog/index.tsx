@@ -7,6 +7,7 @@ import { DialogModal } from '@/components/dialog-modal'
 import { useAuthStore } from '@/hooks/use-auth'
 import { useConfigStore } from '../stores/config-store'
 import { pushSiteContent } from '../services/push-site-content'
+import { refreshSiteAssetVersions, applyFaviconVersion, forceSiteAssetVersions } from '@/hooks/use-site-assets'
 import type { SiteContent, CardStyles } from '../stores/config-store'
 import { SiteSettings, type FileItem, type ArtImageUploads, type BackgroundImageUploads, type SocialButtonImageUploads } from './site-settings'
 import { ColorConfig } from './color-config'
@@ -92,18 +93,9 @@ export default function ConfigDialog({ open, onClose }: ConfigDialogProps) {
 				socialButtonImageUploads
 			)
 			await refreshRemoteConfig()
-			if (typeof document !== 'undefined') {
-				const cacheBust = Date.now().toString()
-				if (faviconItem?.type === 'file') {
-					document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]').forEach(link => {
-						link.href = `/api/images/favicon.png?v=${cacheBust}`
-					})
-				}
-				if (avatarItem?.type === 'file') {
-					document.querySelectorAll<HTMLImageElement>('img[src^="/api/images/avatar.png"], img[src*="/api/images/avatar.png"]').forEach(img => {
-						img.src = `/api/images/avatar.png?v=${cacheBust}`
-					})
-				}
+			if (faviconItem?.type === 'file' || avatarItem?.type === 'file') {
+				const versions = await refreshSiteAssetVersions().catch(() => forceSiteAssetVersions())
+				if (faviconItem?.type === 'file') applyFaviconVersion(versions.favicon)
 			}
 			updateThemeVariables(formData.theme)
 			setFaviconItem(null)

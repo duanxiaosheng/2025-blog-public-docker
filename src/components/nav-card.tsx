@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils'
 import { useSize } from '@/hooks/use-size'
 import { useConfigStore } from '@/app/(home)/stores/config-store'
 import { HomeDraggableLayer } from '@/app/(home)/home-draggable-layer'
+import { useSiteAssetUrl } from '@/hooks/use-site-assets'
 
 const list = [
 	{
@@ -58,7 +59,7 @@ const list = [
 
 const extraSize = 8
 
-const AVATAR_URL = '/api/images/avatar.png'
+const AVATAR_URL = '/api/site-assets/avatar'
 
 export default function NavCard() {
 	const pathname = usePathname()
@@ -67,6 +68,7 @@ export default function NavCard() {
 	const { maxSM } = useSize()
 	const [hoveredIndex, setHoveredIndex] = useState<number>(0)
 	const { siteContent, cardStyles } = useConfigStore()
+	const avatarUrl = useSiteAssetUrl('avatar')
 	const styles = cardStyles.navCard
 	const hiCardStyles = cardStyles.hiCard
 
@@ -140,7 +142,7 @@ export default function NavCard() {
 					)}
 
 					<Link className='flex items-center gap-3' href='/'>
-						<img src={AVATAR_URL} alt='avatar' width={40} height={40} style={{ boxShadow: ' 0 12px 20px -5px #E2D9CE' }} className='rounded-full' />
+						<img src={avatarUrl || AVATAR_URL} alt='avatar' width={40} height={40} style={{ boxShadow: ' 0 12px 20px -5px #E2D9CE' }} className='rounded-full' />
 						{form === 'full' && <span className='font-averia mt-1 text-2xl leading-none font-medium'>{siteContent.meta.title}</span>}
 						{form === 'full' && <span className='text-brand mt-2 text-xs font-medium'>(开发中)</span>}
 					</Link>

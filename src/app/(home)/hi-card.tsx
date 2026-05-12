@@ -3,8 +3,9 @@ import Card from '@/components/card'
 import { useConfigStore } from './stores/config-store'
 import { HomeDraggableLayer } from './home-draggable-layer'
 import Link from 'next/link'
+import { useSiteAssetUrl } from '@/hooks/use-site-assets'
 
-const AVATAR_URL = '/api/images/avatar.png'
+const AVATAR_URL = '/api/site-assets/avatar'
 
 function getGreeting() {
 	const hour = new Date().getHours()
@@ -26,6 +27,7 @@ export default function HiCard() {
 	const greeting = getGreeting()
 	const styles = cardStyles.hiCard
 	const username = siteContent.meta.username || 'Suni'
+	const avatarUrl = useSiteAssetUrl('avatar')
 
 	const x = styles.offsetX !== null ? center.x + styles.offsetX : center.x - styles.width / 2
 	const y = styles.offsetY !== null ? center.y + styles.offsetY : center.y - styles.height / 2
@@ -50,7 +52,7 @@ export default function HiCard() {
 					</>
 				)}
 				<Link href='/live2d'>
-					<img src={AVATAR_URL} className='mx-auto rounded-full' style={{ width: 120, height: 120, boxShadow: ' 0 16px 32px -5px #E2D9CE' }} />
+					<img src={avatarUrl || AVATAR_URL} className='mx-auto rounded-full' style={{ width: 120, height: 120, boxShadow: ' 0 16px 32px -5px #E2D9CE' }} />
 				</Link>
 				<h1 className='font-averia mt-3 text-2xl'>
 					{greeting} <br /> I'm <span className='text-linear text-[32px]'>{username}</span> , Nice to <br /> meet you!

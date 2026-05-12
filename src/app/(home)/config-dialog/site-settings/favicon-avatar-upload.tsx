@@ -3,6 +3,7 @@
 import { useRef } from 'react'
 import { toast } from 'sonner'
 import { hashFileSHA256 } from '@/lib/file-utils'
+import { useSiteAssetUrl } from '@/hooks/use-site-assets'
 import type { FileItem } from './types'
 
 interface FaviconAvatarUploadProps {
@@ -15,6 +16,8 @@ interface FaviconAvatarUploadProps {
 export function FaviconAvatarUpload({ faviconItem, setFaviconItem, avatarItem, setAvatarItem }: FaviconAvatarUploadProps) {
 	const faviconInputRef = useRef<HTMLInputElement>(null)
 	const avatarInputRef = useRef<HTMLInputElement>(null)
+	const faviconUrl = useSiteAssetUrl('favicon')
+	const avatarUrl = useSiteAssetUrl('avatar')
 
 	const handleFaviconFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0]
@@ -55,7 +58,7 @@ export function FaviconAvatarUpload({ faviconItem, setFaviconItem, avatarItem, s
 					{faviconItem?.type === 'file' ? (
 						<img src={faviconItem.previewUrl} alt='favicon preview' className='h-full w-full object-cover' />
 					) : (
-						<img src='/api/images/favicon.png' alt='current favicon' className='h-full w-full object-cover' />
+						<img src={faviconUrl} alt='current favicon' className='h-full w-full object-cover' />
 					)}
 					<div className='pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
 						<span className='text-xs text-white'>{faviconItem ? '更换' : '上传'}</span>
@@ -72,7 +75,7 @@ export function FaviconAvatarUpload({ faviconItem, setFaviconItem, avatarItem, s
 					{avatarItem?.type === 'file' ? (
 						<img src={avatarItem.previewUrl} alt='avatar preview' className='h-full w-full object-cover' />
 					) : (
-						<img src='/api/images/avatar.png' alt='current avatar' className='h-full w-full object-cover' />
+						<img src={avatarUrl} alt='current avatar' className='h-full w-full object-cover' />
 					)}
 					<div className='pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
 						<span className='text-xs text-white'>{avatarItem ? '更换' : '上传'}</span>

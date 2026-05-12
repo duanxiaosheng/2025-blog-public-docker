@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { readSiteAsset } from '@/lib/local-admin/site-assets'
 
 export async function GET() {
-	const { buffer, contentType, version } = await readSiteAsset('favicon')
+	const { buffer, contentType, version } = await readSiteAsset('avatar')
 	return new NextResponse(buffer, {
 		headers: {
 			'Content-Type': contentType,

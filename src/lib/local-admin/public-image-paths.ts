@@ -9,6 +9,8 @@ function normalizeStorageUrl(value: string) {
 	if (!value) return value
 	let next = value.replace(/^\/api(?:\/api)+\/images\//, '/api/images/')
 	if (next.startsWith('/api/images/')) return next.replace('/api/images/', '/images/')
+	if (next.startsWith('/api/site-assets/avatar')) return '/images/avatar.png'
+	if (next.startsWith('/api/site-assets/favicon')) return '/images/favicon.png'
 	return next
 }
 

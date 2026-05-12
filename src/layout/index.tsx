@@ -4,6 +4,8 @@ import { useCenterInit } from '@/hooks/use-center'
 import BlurredBubblesBackground from './backgrounds/blurred-bubbles'
 import NavCard from '@/components/nav-card'
 import { Toaster } from 'sonner'
+import { useSiteAssetVersions, applyFaviconVersion } from '@/hooks/use-site-assets'
+import { useEffect } from 'react'
 import { CircleCheckIcon, InfoIcon, Loader2Icon, OctagonXIcon, TriangleAlertIcon } from 'lucide-react'
 import { useSize, useSizeInit } from '@/hooks/use-size'
 import { useConfigStore } from '@/app/(home)/stores/config-store'
@@ -15,6 +17,11 @@ export default function Layout({ children }: PropsWithChildren) {
 	useSizeInit()
 	const { cardStyles, siteContent, regenerateKey } = useConfigStore()
 	const { maxSM, init } = useSize()
+	const siteAssetVersions = useSiteAssetVersions()
+
+	useEffect(() => {
+		applyFaviconVersion(siteAssetVersions.favicon)
+	}, [siteAssetVersions.favicon])
 
 	const backgroundImages = (siteContent.backgroundImages ?? []) as Array<{ id: string; url: string }>
 	const currentBackgroundImageId = siteContent.currentBackgroundImageId
