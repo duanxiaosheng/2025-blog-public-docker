@@ -1,6 +1,7 @@
 import { readFile, readdir, rm, stat } from 'fs/promises'
 import path from 'path'
-import { ensureDataSeeded, getBlogsDir, getPublicDir } from './storage'
+import { ensureDataSeeded, getBlogsDir, getPublicDir, readConfigJson, writeConfigJson } from './storage'
+import { getSiteAssetVersion } from './site-assets'
 
 const IMAGE_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.avif'])
 const PROTECTED_ASSETS = new Set(['/images/avatar.png', '/images/favicon.png'])
@@ -114,6 +115,36 @@ async function collectJsonReferences(filePath: string, references: ReferenceMap)
 	})
 }
 
+async function collectSiteContentReferences(filePath: string, references: ReferenceMap) {
+	const data = await readJson(filePath)
+	if (!data) return
+
+	const currentArtImageId = typeof data.currentArtImageId === 'string' ? data.currentArtImageId : ''
+	const currentBackgroundImageId = typeof data.currentBackgroundImageId === 'string' ? data.currentBackgroundImageId : ''
+
+	if (Array.isArray(data.artImages)) {
+		data.artImages.forEach((item: any, index: number) => {
+			if (item?.id && item.id === currentArtImageId && typeof item.url === 'string') {
+				addReference(references, item.url, `${path.relative(process.cwd(), filePath)}#artImages.${index}.url(current)`)
+			}
+		})
+	}
+
+	if (Array.isArray(data.backgroundImages)) {
+		data.backgroundImages.forEach((item: any, index: number) => {
+			if (item?.id && item.id === currentBackgroundImageId && typeof item.url === 'string') {
+				addReference(references, item.url, `${path.relative(process.cwd(), filePath)}#backgroundImages.${index}.url(current)`)
+			}
+		})
+	}
+
+	if (Array.isArray(data.socialButtons)) {
+		data.socialButtons.forEach((item: any, index: number) => {
+			if (typeof item?.value === 'string') addReference(references, item.value, `${path.relative(process.cwd(), filePath)}#socialButtons.${index}.value`)
+		})
+	}
+}
+
 function collectTextReferences(text: string, source: string, references: ReferenceMap) {
 	const patterns = [
 		/!\[[^\]]*\]\(([^)]+)\)/g,
@@ -143,7 +174,9 @@ async function collectReferences() {
 		if (filePath.endsWith('.json')) await collectJsonReferences(filePath, references)
 	}
 	for (const filePath of await walkFiles(configDir)) {
-		if (filePath.endsWith('.json')) await collectJsonReferences(filePath, references)
+		if (!filePath.endsWith('.json')) continue
+		if (path.basename(filePath) === 'site-content.json') await collectSiteContentReferences(filePath, references)
+		else await collectJsonReferences(filePath, references)
 	}
 	for (const filePath of await walkFiles(blogsDir)) {
 		if (filePath.endsWith('.json')) await collectJsonReferences(filePath, references)
@@ -171,6 +204,48 @@ function formatBytes(bytes: number) {
 	return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
 
+async function getProtectedAssetItems(references: ReferenceMap): Promise<AssetInventoryItem[]> {
+	const publicDir = getPublicDir()
+	const items: AssetInventoryItem[] = []
+	for (const assetPath of PROTECTED_ASSETS) {
+		const relative = assetPath.replace(/^\//, '')
+		const dataPath = path.join(publicDir, relative)
+		let filePath = dataPath
+		let info = await stat(filePath).catch(() => null)
+		if (!info) {
+			const kind = assetPath.includes('avatar') ? 'avatar' : 'favicon'
+			const version = await getSiteAssetVersion(kind)
+			const sizePart = Number(version.split('-')[1] || 0)
+			items.push({
+				path: assetPath,
+				url: assetPath === '/images/avatar.png' ? '/api/site-assets/avatar' : '/api/site-assets/favicon',
+				used: true,
+				protected: true,
+				deletable: false,
+				size: sizePart,
+				sizeLabel: formatBytes(sizePart),
+				source: 'images',
+				ext: 'png',
+				references: Array.from(references.get(assetPath) || ['protected-site-asset'])
+			})
+			continue
+		}
+		items.push({
+			path: assetPath,
+			url: assetPath === '/images/avatar.png' ? '/api/site-assets/avatar' : '/api/site-assets/favicon',
+			used: true,
+			protected: true,
+			deletable: false,
+			size: info.size,
+			sizeLabel: formatBytes(info.size),
+			source: 'images',
+			ext: path.extname(filePath).toLowerCase().replace(/^\./, ''),
+			references: Array.from(references.get(assetPath) || ['protected-site-asset'])
+		})
+	}
+	return items
+}
+
 export async function getAssetInventory(): Promise<AssetInventory> {
 	await ensureDataSeeded()
 	const publicDir = getPublicDir()
@@ -182,6 +257,7 @@ export async function getAssetInventory(): Promise<AssetInventory> {
 		if (isIgnoredFile(filePath) || !isImageFile(filePath)) continue
 		const storagePath = toStoragePath(filePath, publicDir)
 		if (!storagePath.startsWith('/images/') && !storagePath.startsWith('/blogs/')) continue
+		if (PROTECTED_ASSETS.has(storagePath)) continue
 		const info = await stat(filePath)
 		const refs = Array.from(references.get(storagePath) || [])
 		const protectedAsset = PROTECTED_ASSETS.has(storagePath)
@@ -200,6 +276,7 @@ export async function getAssetInventory(): Promise<AssetInventory> {
 		})
 	}
 
+	assets.push(...(await getProtectedAssetItems(references)))
 	assets.sort((a, b) => Number(a.used) - Number(b.used) || a.path.localeCompare(b.path))
 	return {
 		assets,
@@ -222,6 +299,28 @@ function resolveDataPublicPath(assetPath: string) {
 	const filePath = path.resolve(publicDir, normalized.replace(/^\//, ''))
 	if (filePath !== publicDir && !filePath.startsWith(`${publicDir}${path.sep}`)) throw new Error('非法资源路径')
 	return { normalized, filePath }
+}
+
+function removeDeletedSiteContentAssets(siteContent: any, deleted: Set<string>) {
+	if (!deleted.size || !siteContent || typeof siteContent !== 'object') return siteContent
+	const next = { ...siteContent }
+	if (Array.isArray(next.artImages)) {
+		next.artImages = next.artImages.filter((item: any) => !deleted.has(normalizeAssetReference(String(item?.url || '')) || ''))
+		if (next.currentArtImageId && !next.artImages.some((item: any) => item?.id === next.currentArtImageId)) {
+			next.currentArtImageId = next.artImages[0]?.id || ''
+		}
+	}
+	if (Array.isArray(next.backgroundImages)) {
+		next.backgroundImages = next.backgroundImages.filter((item: any) => {
+			const url = String(item?.url || '')
+			if (!url.trim()) return true
+			return !deleted.has(normalizeAssetReference(url) || '')
+		})
+		if (next.currentBackgroundImageId && !next.backgroundImages.some((item: any) => item?.id === next.currentBackgroundImageId)) {
+			next.currentBackgroundImageId = next.backgroundImages.find((item: any) => String(item?.url || '').trim())?.id || ''
+		}
+	}
+	return next
 }
 
 export async function deleteUnusedAssets(paths: string[]) {
@@ -258,6 +357,13 @@ export async function deleteUnusedAssets(paths: string[]) {
 		}
 		await rm(filePath, { force: true })
 		deleted.push(normalized)
+	}
+
+	if (deleted.length) {
+		const deletedSet = new Set(deleted)
+		const siteContent = await readConfigJson('site-content.json', {})
+		const nextSiteContent = removeDeletedSiteContentAssets(siteContent, deletedSet)
+		await writeConfigJson('site-content.json', nextSiteContent)
 	}
 
 	const nextInventory = await getAssetInventory()
