@@ -77,7 +77,7 @@ export default function NavCard() {
 	const [show, setShow] = useState(false)
 	const { maxSM, maxXS } = useSize()
 	const [hoveredIndex, setHoveredIndex] = useState<number>(0)
-	const [hoverRect, setHoverRect] = useState<{ left: number; width: number } | null>(null)
+	const [hoverRect, setHoverRect] = useState<{ centerX: number; top: number; width: number; height: number } | null>(null)
 	const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
 	const { siteContent, cardStyles } = useConfigStore()
 	const avatarUrl = useSiteAssetUrl('avatar')
@@ -140,8 +140,10 @@ export default function NavCard() {
 		if (!activeItem) return
 
 		setHoverRect({
-			left: activeItem.offsetLeft,
-			width: activeItem.offsetWidth
+			centerX: activeItem.offsetLeft + activeItem.offsetWidth / 2,
+			top: activeItem.offsetTop,
+			width: activeItem.offsetWidth,
+			height: activeItem.offsetHeight
 		})
 	}, [form, hoveredIndex, maxSM, maxXS, pathname])
 
@@ -186,10 +188,10 @@ export default function NavCard() {
 									animate={
 										form === 'icons'
 											? {
-													left: (hoverRect?.left ?? 0) - extraSize,
-													top: -extraSize,
+													left: (hoverRect?.centerX ?? itemHeight / 2) - ((hoverRect?.width ?? itemHeight) + extraSize * 2) / 2,
+													top: (hoverRect?.top ?? 0) - extraSize,
 													width: (hoverRect?.width ?? itemHeight) + extraSize * 2,
-													height: itemHeight + extraSize * 2
+													height: (hoverRect?.height ?? itemHeight) + extraSize * 2
 											  }
 											: { top: hoveredIndex * (itemHeight + 8), left: 0, width: '100%', height: itemHeight }
 									}
