@@ -19,6 +19,8 @@ export interface AppLink {
 	icon: string
 	url: string
 	visible?: boolean
+	description?: string
+	tags?: string[]
 }
 
 interface AppCardProps {
@@ -62,18 +64,19 @@ export function AppCard({ app, isEditMode = false, onUpdate, onDelete }: AppCard
 			initial={{ opacity: 0, y: 10, scale: 0.96 }}
 			animate={{ opacity: visible ? 1 : 0.45, y: 0, scale: 1 }}
 			whileHover={!canEdit ? { y: -4, scale: 1.03 } : undefined}
+			title={!canEdit ? localApp.description : undefined}
 			className={cn('group relative flex flex-col items-center gap-2 rounded-3xl p-3 transition', !visible && 'opacity-50')}>
 			{isEditMode && (
-				<div className='absolute -top-2 left-1/2 z-10 flex -translate-x-1/2 gap-1 rounded-full border bg-white/90 px-2 py-1 text-xs shadow-sm backdrop-blur-xl'>
+				<div className='absolute -top-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5 rounded-full border bg-white/95 px-3 py-1.5 text-sm shadow-sm backdrop-blur-xl'>
 					{isEditing ? (
 						<>
-							<button type='button' onClick={handleCancel} className='text-gray-400 hover:text-gray-600'>取消</button>
-							<button type='button' onClick={() => setIsEditing(false)} className='text-blue-400 hover:text-blue-600'>完成</button>
+							<button type='button' onClick={handleCancel} className='px-1 text-gray-500 hover:text-gray-700'>取消</button>
+							<button type='button' onClick={() => setIsEditing(false)} className='px-1 text-blue-500 hover:text-blue-700'>完成</button>
 						</>
 					) : (
 						<>
-							<button type='button' onClick={() => setIsEditing(true)} className='text-blue-400 hover:text-blue-600'>编辑</button>
-							<button type='button' onClick={onDelete} className='text-red-400 hover:text-red-600'>删除</button>
+							<button type='button' onClick={() => setIsEditing(true)} className='px-1 text-blue-500 hover:text-blue-700'>编辑</button>
+							<button type='button' onClick={onDelete} className='px-1 text-red-500 hover:text-red-700'>删除</button>
 						</>
 					)}
 				</div>
@@ -111,6 +114,19 @@ export function AppCard({ app, isEditMode = false, onUpdate, onDelete }: AppCard
 						placeholder='https://example.com'
 						className='w-full rounded-lg bg-white/80 px-2 py-1 text-center text-[11px] outline-none focus:ring-2 focus:ring-brand/20'
 					/>
+					<input
+						value={localApp.tags?.join(', ') || ''}
+						onChange={e => handleFieldChange('tags', e.target.value.split(',').map(tag => tag.trim()).filter(Boolean))}
+						placeholder='标签，逗号分隔'
+						className='w-full rounded-lg bg-white/80 px-2 py-1 text-center text-[11px] outline-none focus:ring-2 focus:ring-brand/20'
+					/>
+					<textarea
+						value={localApp.description || ''}
+						onChange={e => handleFieldChange('description', e.target.value)}
+						placeholder='描述（悬停显示）'
+						rows={2}
+						className='w-full resize-none rounded-lg bg-white/80 px-2 py-1 text-center text-[11px] outline-none focus:ring-2 focus:ring-brand/20'
+					/>
 					<label className='text-secondary flex items-center justify-center gap-1 text-[11px]'>
 						<input type='checkbox' checked={visible} onChange={e => handleFieldChange('visible', e.target.checked)} />
 						显示
@@ -119,6 +135,11 @@ export function AppCard({ app, isEditMode = false, onUpdate, onDelete }: AppCard
 			) : (
 				<>
 					<span className='text-primary max-w-24 truncate text-center text-sm font-medium'>{localApp.name}</span>
+					{localApp.description && (
+						<div className='pointer-events-none absolute bottom-full left-1/2 z-20 mb-3 hidden w-48 -translate-x-1/2 rounded-2xl border bg-white/95 px-3 py-2 text-center text-xs leading-relaxed text-secondary shadow-lg backdrop-blur-xl group-hover:block'>
+							{localApp.description}
+						</div>
+					)}
 					<ExternalLink className='text-secondary/0 size-3 transition-colors group-hover:text-secondary/70' />
 				</>
 			)}

@@ -14,12 +14,12 @@ interface CreateDialogProps {
 }
 
 export default function CreateDialog({ app, onClose, onSave }: CreateDialogProps) {
-	const [formData, setFormData] = useState<AppLink>({ name: '', icon: '', url: '', visible: true })
+	const [formData, setFormData] = useState<AppLink>({ name: '', icon: '', url: '', visible: true, description: '', tags: [] })
 	const [showIconDialog, setShowIconDialog] = useState(false)
 	const [selectedIconItem, setSelectedIconItem] = useState<IconItem | null>(null)
 
 	useEffect(() => {
-		setFormData(app || { name: '', icon: '', url: '', visible: true })
+		setFormData(app || { name: '', icon: '', url: '', visible: true, description: '', tags: [] })
 		setSelectedIconItem(null)
 	}, [app])
 
@@ -33,7 +33,7 @@ export default function CreateDialog({ app, onClose, onSave }: CreateDialogProps
 			toast.error('请填写应用名称、图标和链接')
 			return
 		}
-		onSave({ ...formData, name: formData.name.trim(), url: formData.url.trim(), visible: formData.visible !== false }, selectedIconItem || undefined)
+		onSave({ ...formData, name: formData.name.trim(), url: formData.url.trim(), description: formData.description?.trim() || '', tags: formData.tags || [], visible: formData.visible !== false }, selectedIconItem || undefined)
 		onClose()
 		toast.success(app ? '更新成功' : '添加成功')
 	}
@@ -57,10 +57,32 @@ export default function CreateDialog({ app, onClose, onSave }: CreateDialogProps
 				</div>
 			</div>
 
-			<label className='text-secondary flex items-center gap-2 text-sm'>
-				<input type='checkbox' checked={formData.visible !== false} onChange={e => setFormData({ ...formData, visible: e.target.checked })} />
-				在应用导航中显示
-			</label>
+			<div className='space-y-3'>
+				<div>
+					<label className='text-secondary mb-1 block text-sm'>标签分类</label>
+					<input
+						type='text'
+						value={formData.tags?.join(', ') || ''}
+						onChange={e => setFormData({ ...formData, tags: e.target.value.split(',').map(tag => tag.trim()).filter(Boolean) })}
+						placeholder='工具, 社交, 站内'
+						className='w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand/20'
+					/>
+				</div>
+				<div>
+					<label className='text-secondary mb-1 block text-sm'>描述（可选，鼠标悬停显示）</label>
+					<textarea
+						value={formData.description || ''}
+						onChange={e => setFormData({ ...formData, description: e.target.value })}
+						placeholder='这个入口是做什么的...'
+						rows={3}
+						className='w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand/20'
+					/>
+				</div>
+				<label className='text-secondary flex items-center gap-2 text-sm'>
+					<input type='checkbox' checked={formData.visible !== false} onChange={e => setFormData({ ...formData, visible: e.target.checked })} />
+					在应用导航中显示
+				</label>
+			</div>
 
 			<div className='mt-6 flex gap-3'>
 				<button onClick={onClose} className='flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm transition-colors hover:bg-gray-50'>取消</button>

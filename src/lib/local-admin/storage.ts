@@ -159,6 +159,8 @@ const DEFAULT_APPS = [
 		name: '示例应用',
 		icon: '/images/blockies.svg',
 		url: '/',
+		description: '这里可以添加你的常用网站、工具或个人入口。',
+		tags: ['说明'],
 		visible: true
 	}
 ]
