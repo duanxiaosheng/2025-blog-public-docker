@@ -158,7 +158,7 @@ export default function NavCard() {
 					height={size.height}
 					x={position.x}
 					y={position.y}
-					className={clsx(form === 'mini' && 'overflow-hidden p-3', form === 'icons' && 'overflow-visible flex items-center gap-3 px-4 py-2 sm:gap-5', form === 'full' && 'p-6')}>
+					className={clsx(form === 'mini' && 'overflow-hidden p-3', form === 'icons' && 'overflow-visible flex items-center gap-2 px-4 py-2 sm:gap-4', form === 'full' && 'p-6')}>
 					{form === 'full' && siteContent.enableChristmas && (
 						<>
 							<img
@@ -180,7 +180,7 @@ export default function NavCard() {
 						<>
 							{form !== 'icons' && <div className='text-secondary mt-6 text-sm uppercase'>General</div>}
 
-							<div className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0 flex min-w-0 flex-1 items-center justify-between gap-3 space-y-0 overflow-visible sm:gap-6')}>
+							<div className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0 flex min-w-0 flex-1 items-center justify-between gap-2 space-y-0 overflow-visible sm:gap-4')}>
 								<motion.div
 									className='pointer-events-none absolute max-w-[230px] rounded-full border'
 									layoutId='nav-hover'
