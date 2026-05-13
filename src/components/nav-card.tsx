@@ -113,7 +113,7 @@ export default function NavCard() {
 
 	const size = useMemo(() => {
 		if (form === 'mini') return { width: 64, height: 64 }
-		else if (form === 'icons') return { width: maxSM ? (maxXS ? 306 : 332) : Math.min(408, Math.max(332, list.length * 50 + 36)), height: 64 }
+		else if (form === 'icons') return { width: maxSM ? (maxXS ? 356 : 392) : Math.max(408, 88 + list.length * 44 + (list.length - 1) * 18 + 24), height: 64 }
 		else return { width: styles.width, height: Math.max(styles.height, 494) }
 	}, [form, styles, maxSM, maxXS])
 
@@ -137,7 +137,7 @@ export default function NavCard() {
 					height={size.height}
 					x={position.x}
 					y={position.y}
-					className={clsx(form === 'mini' && 'overflow-hidden p-3', form === 'icons' && 'overflow-visible flex items-center gap-3 px-3 py-2 sm:gap-5', form === 'full' && 'p-6')}>
+					className={clsx(form === 'mini' && 'overflow-hidden p-3', form === 'icons' && 'overflow-visible flex items-center gap-3 px-4 py-2 sm:gap-5', form === 'full' && 'p-6')}>
 					{form === 'full' && siteContent.enableChristmas && (
 						<>
 							<img
