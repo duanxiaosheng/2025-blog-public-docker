@@ -65,7 +65,7 @@ const list = [
 	}
 ]
 
-const extraSize = 8
+const extraSize = 5
 const APPS_ICON_SCALE = 1.5
 const DEFAULT_ICON_SIZE_CLASS = 'h-7 w-7'
 
