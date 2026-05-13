@@ -183,16 +183,16 @@ export default function ConfigDialog({ open, onClose }: ConfigDialogProps) {
 
 	return (
 		<DialogModal open={open} onClose={handleCancel} className='card scrollbar-none max-h-[90vh] min-h-[600px] w-[720px] max-w-[calc(100vw-2rem)] overflow-y-auto'>
-			<div className='mb-6 flex items-center justify-between'>
-				<div className='flex gap-1'>
+			<div className='mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
+				<div className='flex flex-wrap gap-1'>
 					{tabs.map(tab => (
-						<button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`relative px-4 py-2 text-sm font-medium transition-colors ${activeTab === tab.id ? 'text-brand' : 'text-secondary hover:text-primary'}`}>
+						<button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`relative whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-colors ${activeTab === tab.id ? 'text-brand bg-white/55' : 'text-secondary hover:text-primary'}`}>
 							{tab.label}
 							{activeTab === tab.id && <div className='bg-brand absolute right-0 bottom-0 left-0 h-0.5' />}
 						</button>
 					))}
 				</div>
-				<div className='flex gap-3'>
+				<div className='flex flex-wrap gap-3'>
 					<AdminPasswordDialog />
 					<motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handlePreview} className='bg-card rounded-xl border px-6 py-2 text-sm'>预览</motion.button>
 					<motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleCancel} disabled={isSaving} className='bg-card rounded-xl border px-6 py-2 text-sm'>取消</motion.button>
