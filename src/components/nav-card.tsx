@@ -2,7 +2,7 @@
 
 import Card from '@/components/card'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { useCenterStore } from '@/hooks/use-center'
 import { CARD_SPACING } from '@/consts'
@@ -66,6 +66,8 @@ const list = [
 ]
 
 const extraSize = 8
+const APPS_ICON_SCALE = 1.5
+const DEFAULT_ICON_SIZE_CLASS = 'h-7 w-7'
 
 const AVATAR_URL = '/api/site-assets/avatar'
 
@@ -75,6 +77,8 @@ export default function NavCard() {
 	const [show, setShow] = useState(false)
 	const { maxSM, maxXS } = useSize()
 	const [hoveredIndex, setHoveredIndex] = useState<number>(0)
+	const [hoverRect, setHoverRect] = useState<{ left: number; width: number } | null>(null)
+	const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
 	const { siteContent, cardStyles } = useConfigStore()
 	const avatarUrl = useSiteAssetUrl('avatar')
 	const styles = cardStyles.navCard
@@ -126,6 +130,21 @@ export default function NavCard() {
 		}
 	}, [hoveredIndex, activeIndex, form])
 
+	useEffect(() => {
+		if (form !== 'icons') {
+			setHoverRect(null)
+			return
+		}
+
+		const activeItem = itemRefs.current[hoveredIndex]
+		if (!activeItem) return
+
+		setHoverRect({
+			left: activeItem.offsetLeft,
+			width: activeItem.offsetWidth
+		})
+	}, [form, hoveredIndex, maxSM, maxXS, pathname])
+
 	if (maxSM) position = { x: center.x - size.width / 2, y: 16 }
 
 	if (show)
@@ -161,17 +180,17 @@ export default function NavCard() {
 
 							<div className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0 flex min-w-0 flex-1 items-center justify-between gap-3 space-y-0 overflow-visible sm:gap-6')}>
 								<motion.div
-									className='absolute max-w-[230px] rounded-full border'
+									className='pointer-events-none absolute max-w-[230px] rounded-full border'
 									layoutId='nav-hover'
 									initial={false}
 									animate={
 										form === 'icons'
 											? {
-													left: `calc(${hoveredIndex} * ((100% - ${itemHeight}px) / ${Math.max(list.length - 1, 1)}) - ${extraSize}px)`,
+													left: (hoverRect?.left ?? 0) - extraSize,
 													top: -extraSize,
-													width: itemHeight + extraSize * 2,
+													width: (hoverRect?.width ?? itemHeight) + extraSize * 2,
 													height: itemHeight + extraSize * 2
-												}
+											  }
 											: { top: hoveredIndex * (itemHeight + 8), left: 0, width: '100%', height: itemHeight }
 									}
 									transition={{
@@ -182,18 +201,30 @@ export default function NavCard() {
 									style={{ backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)' }}
 								/>
 
-								{list.map((item, index) => (
-									<Link
-										key={item.href}
-										href={item.href}
-										className={cn('text-secondary text-md relative z-10 flex items-center gap-3 rounded-full px-5 py-3', form === 'icons' && 'p-0')}
-										onMouseEnter={() => setHoveredIndex(index)}>
-										<div className='flex h-7 w-7 shrink-0 items-center justify-center'>
-											{hoveredIndex == index ? <item.iconActive className='text-brand absolute h-7 w-7' /> : <item.icon className='absolute h-7 w-7' />}
-										</div>
-										{form !== 'icons' && <span className={clsx(index == hoveredIndex && 'text-primary font-medium')}>{item.label}</span>}
-									</Link>
-								))}
+								{list.map((item, index) => {
+									const isAppsItem = item.href === '/apps'
+									const iconSizeClass = DEFAULT_ICON_SIZE_CLASS
+									const iconWrapperStyle = isAppsItem ? { transform: `scale(${APPS_ICON_SCALE})` } : undefined
+
+									return (
+										<Link
+											ref={element => {
+												itemRefs.current[index] = element
+											}}
+											key={item.href}
+											href={item.href}
+											className={cn(
+												'text-secondary text-md relative z-10 flex items-center gap-3 rounded-full px-5 py-3',
+												form === 'icons' && 'flex h-11 w-11 shrink-0 items-center justify-center p-0'
+											)}
+											onMouseEnter={() => setHoveredIndex(index)}>
+											<div className='flex h-7 w-7 shrink-0 items-center justify-center' style={iconWrapperStyle}>
+												{hoveredIndex == index ? <item.iconActive className={cn('text-brand absolute', iconSizeClass)} /> : <item.icon className={cn('absolute', iconSizeClass)} />}
+											</div>
+											{form !== 'icons' && <span className={clsx(index == hoveredIndex && 'text-primary font-medium')}>{item.label}</span>}
+										</Link>
+									)
+								})}
 							</div>
 						</>
 					)}

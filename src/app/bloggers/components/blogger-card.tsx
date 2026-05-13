@@ -91,12 +91,18 @@ export function BloggerCard({ blogger, isEditMode = false, onUpdate, onDelete }:
 			<div>
 				<div className='mb-4 flex items-center gap-4'>
 					<div className='group relative'>
-						<img
-							src={displayAvatarUrl}
-							alt={localBlogger.name}
-							className={cn('h-16 w-16 rounded-full object-cover', canEdit && 'cursor-pointer')}
-							onClick={() => canEdit && setShowAvatarDialog(true)}
-						/>
+						{canEdit ? (
+							<img
+								src={displayAvatarUrl}
+								alt={localBlogger.name}
+								className={cn('h-16 w-16 rounded-full object-cover', canEdit && 'cursor-pointer')}
+								onClick={() => canEdit && setShowAvatarDialog(true)}
+							/>
+						) : (
+							<a href={localBlogger.url} target='_blank' rel='noopener noreferrer' className='block'>
+								<img src={displayAvatarUrl} alt={localBlogger.name} className='h-16 w-16 rounded-full object-cover transition-transform duration-200 hover:scale-[1.03]' />
+							</a>
+						)}
 						{canEdit && (
 							<div className='ev pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100'>
 								<span className='text-xs text-white'>更换</span>
@@ -104,13 +110,19 @@ export function BloggerCard({ blogger, isEditMode = false, onUpdate, onDelete }:
 						)}
 					</div>
 					<div className='flex-1'>
-						<h3
-							contentEditable={canEdit}
-							suppressContentEditableWarning
-							onBlur={e => handleFieldChange('name', e.currentTarget.textContent || '')}
-							className={cn('group-hover:text-brand text-lg font-bold transition-colors focus:outline-none', canEdit && 'cursor-text')}>
-							{localBlogger.name}
-						</h3>
+						{canEdit ? (
+							<h3
+								contentEditable
+								suppressContentEditableWarning
+								onBlur={e => handleFieldChange('name', e.currentTarget.textContent || '')}
+								className={cn('group-hover:text-brand text-lg font-bold transition-colors focus:outline-none', canEdit && 'cursor-text')}>
+								{localBlogger.name}
+							</h3>
+						) : (
+							<a href={localBlogger.url} target='_blank' rel='noopener noreferrer' className='text-lg font-bold transition-colors hover:text-brand'>
+								{localBlogger.name}
+							</a>
+						)}
 						{canEdit ? (
 							<div
 								contentEditable
