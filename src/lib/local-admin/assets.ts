@@ -1,7 +1,7 @@
 import path from 'path'
 import { hashPassword } from './auth'
 
-export const PUBLIC_IMAGE_SECTIONS = ['project', 'share', 'blogger', 'pictures'] as const
+export const PUBLIC_IMAGE_SECTIONS = ['project', 'share', 'blogger', 'pictures', 'apps'] as const
 export type PublicImageSection = (typeof PUBLIC_IMAGE_SECTIONS)[number]
 
 const PUBLIC_IMAGE_SECTION_SET = new Set<string>(PUBLIC_IMAGE_SECTIONS)

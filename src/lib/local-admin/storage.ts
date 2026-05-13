@@ -153,6 +153,16 @@ const DEFAULT_SHARE = [
 	}
 ]
 
+
+const DEFAULT_APPS = [
+	{
+		name: '示例应用',
+		icon: '/images/blockies.svg',
+		url: '/',
+		visible: true
+	}
+]
+
 const DEFAULT_BLOGGERS = [
 	{
 		name: '示例博客',
@@ -203,6 +213,7 @@ export async function ensureDataSeeded() {
 	await seedJsonIfMissing(path.join(CONTENT_DIR, 'projects.json'), DEFAULT_PROJECTS)
 	await seedJsonIfMissing(path.join(CONTENT_DIR, 'share.json'), DEFAULT_SHARE)
 	await seedJsonIfMissing(path.join(CONTENT_DIR, 'snippets.json'), [])
+	await seedJsonIfMissing(path.join(CONTENT_DIR, 'apps.json'), DEFAULT_APPS)
 	await seedJsonIfMissing(path.join(CONTENT_DIR, 'bloggers.json'), DEFAULT_BLOGGERS)
 	await seedJsonIfMissing(path.join(CONTENT_DIR, 'pictures.json'), DEFAULT_PICTURES)
 	await seedJsonIfMissing(path.join(CONTENT_DIR, 'likes.json'), { counts: {} })

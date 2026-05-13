@@ -10,6 +10,8 @@ import ScrollOutlineSVG from '@/svgs/scroll-outline.svg'
 import ScrollFilledSVG from '@/svgs/scroll-filled.svg'
 import ProjectsFilledSVG from '@/svgs/projects-filled.svg'
 import ProjectsOutlineSVG from '@/svgs/projects-outline.svg'
+import AppsFilledSVG from '@/svgs/apps-filled.svg'
+import AppsOutlineSVG from '@/svgs/apps-outline.svg'
 import AboutFilledSVG from '@/svgs/about-filled.svg'
 import AboutOutlineSVG from '@/svgs/about-outline.svg'
 import ShareFilledSVG from '@/svgs/share-filled.svg'
@@ -30,6 +32,12 @@ const list = [
 		iconActive: ScrollFilledSVG,
 		label: '近期文章',
 		href: '/blog'
+	},
+	{
+		icon: AppsOutlineSVG,
+		iconActive: AppsFilledSVG,
+		label: '应用导航',
+		href: '/apps'
 	},
 	{
 		icon: ProjectsOutlineSVG,
@@ -105,8 +113,8 @@ export default function NavCard() {
 
 	const size = useMemo(() => {
 		if (form === 'mini') return { width: 64, height: 64 }
-		else if (form === 'icons') return { width: 340, height: 64 }
-		else return { width: styles.width, height: styles.height }
+		else if (form === 'icons') return { width: Math.min(420, Math.max(340, list.length * 52 + 40)), height: 64 }
+		else return { width: styles.width, height: Math.max(styles.height, 494) }
 	}, [form, styles])
 
 	useEffect(() => {
@@ -118,7 +126,7 @@ export default function NavCard() {
 		}
 	}, [hoveredIndex, activeIndex, form])
 
-	if (maxSM) position = { x: center.x - size.width / 2, y: 16 }
+	if (maxSM) position = { x: Math.max(12, center.x - size.width / 2), y: 16 }
 
 	if (show)
 		return (

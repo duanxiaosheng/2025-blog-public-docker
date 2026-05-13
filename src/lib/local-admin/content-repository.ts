@@ -3,7 +3,7 @@ import { readContentJson, writeContentJson } from './storage'
 import { assertNoBlobImageUrls } from './blob-guards'
 import { normalizePublicImagesForDisplay, normalizePublicImagesForStorage } from './public-image-paths'
 
-export type CollectionKey = 'about' | 'projects' | 'share' | 'bloggers' | 'pictures' | 'snippets'
+export type CollectionKey = 'about' | 'projects' | 'share' | 'bloggers' | 'pictures' | 'snippets' | 'apps'
 
 type CollectionConfig = {
 	file: string
@@ -45,6 +45,12 @@ const COLLECTIONS: Record<CollectionKey, CollectionConfig> = {
 	snippets: {
 		file: 'snippets.json',
 		fallback: [],
+		array: true
+	},
+	apps: {
+		file: 'apps.json',
+		fallback: [],
+		imageFields: ['icon'],
 		array: true
 	}
 }
