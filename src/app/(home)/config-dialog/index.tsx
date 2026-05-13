@@ -182,7 +182,7 @@ export default function ConfigDialog({ open, onClose }: ConfigDialogProps) {
 	]
 
 	return (
-		<DialogModal open={open} onClose={handleCancel} className='card scrollbar-none max-h-[90vh] min-h-[600px] w-[640px] overflow-y-auto'>
+		<DialogModal open={open} onClose={handleCancel} className='card scrollbar-none max-h-[90vh] min-h-[600px] w-[720px] max-w-[calc(100vw-2rem)] overflow-y-auto'>
 			<div className='mb-6 flex items-center justify-between'>
 				<div className='flex gap-1'>
 					{tabs.map(tab => (
