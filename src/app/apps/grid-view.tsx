@@ -27,11 +27,6 @@ export default function GridView({ apps, isEditMode = false, onUpdate, onDelete 
 
 	return (
 		<div className='mx-auto w-full max-w-6xl px-6 pt-24 pb-16'>
-			<div className='mb-8 text-center'>
-				<h1 className='font-averia text-primary text-4xl font-semibold'>应用导航</h1>
-				<p className='text-secondary mt-3 text-sm'>把常用网站、工具和个人入口收在这里</p>
-			</div>
-
 			<div className='mb-10 space-y-4'>
 				<div className='group relative mx-auto w-full max-w-md'>
 					<Search className='text-secondary pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 transition-colors group-focus-within:text-brand' />

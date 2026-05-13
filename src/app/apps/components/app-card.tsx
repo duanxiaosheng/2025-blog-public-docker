@@ -2,7 +2,6 @@
 
 import { motion } from 'motion/react'
 import { useMemo, useState } from 'react'
-import { ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import IconUploadDialog, { type IconItem } from './icon-upload-dialog'
 
@@ -140,7 +139,6 @@ export function AppCard({ app, isEditMode = false, onUpdate, onDelete }: AppCard
 							{localApp.description}
 						</div>
 					)}
-					<ExternalLink className='text-secondary/0 size-3 transition-colors group-hover:text-secondary/70' />
 				</>
 			)}
 
