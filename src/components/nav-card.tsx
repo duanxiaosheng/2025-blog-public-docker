@@ -198,6 +198,7 @@ export default function NavCard() {
 					height={size.height}
 					x={position.x}
 					y={position.y}
+					enterScale={form === 'icons' ? 1 : 0.6}
 					className={clsx(form === 'mini' && 'overflow-hidden p-3', form === 'icons' && 'overflow-visible flex items-center gap-2 px-4 py-2 sm:gap-4', form === 'full' && 'p-6')}>
 					{form === 'full' && siteContent.enableChristmas && (
 						<>
