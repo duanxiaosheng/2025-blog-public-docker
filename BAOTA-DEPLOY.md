@@ -24,8 +24,6 @@ docker run -d \
   --name 2025-blog-local-docker \
   -p 3000:3000 \
   -e NODE_ENV=production \
-  -e ADMIN_PASSWORD='Sheng123..' \
-  -e SESSION_SECRET='change-this-session-secret-after-deploy' \
   -e DATA_DIR=/app/data \
   -v /www/wwwroot/2025-blog-local-docker/data:/app/data \
   --restart unless-stopped \
@@ -38,26 +36,18 @@ docker run -d \
 http://服务器IP:3000
 ```
 
-### 4. 强烈建议改掉的环境变量
+### 4. 默认行为说明
 
-至少改这两个：
+默认情况下：
 
-- `ADMIN_PASSWORD`
-- `SESSION_SECRET`
+- **不设置 `ADMIN_PASSWORD`**，首次访问后台/编辑页时走初始化密码流程
+- **不设置 `SESSION_SECRET`**，程序会自动生成一个随机值并保存到 `data/config/admin-auth.json`
 
-例如你自己的命令应该长这样：
+如果你确实想预置固定密码/固定 session secret，也可以自己额外加：
 
 ```bash
-docker run -d \
-  --name 2025-blog-local-docker \
-  -p 3000:3000 \
-  -e NODE_ENV=production \
-  -e ADMIN_PASSWORD='你自己的后台密码' \
-  -e SESSION_SECRET='一串足够长的随机字符串' \
-  -e DATA_DIR=/app/data \
-  -v /www/wwwroot/2025-blog-local-docker/data:/app/data \
-  --restart unless-stopped \
-  duanxiaosheng/2025-blog-local-docker:latest
+-e ADMIN_PASSWORD='你自己的后台密码'
+-e SESSION_SECRET='一串足够长的随机字符串'
 ```
 
 ---
@@ -81,14 +71,19 @@ mkdir -p data
 docker compose -f docker-compose.release.yml up -d
 ```
 
-### `.env` 里建议至少改这些
+### `.env` 里默认这样就够了
+
+```env
+PORT=3000
+DATA_DIR=/app/data
+IMAGE_NAME=duanxiaosheng/2025-blog-local-docker:latest
+```
+
+如果你想跳过初始化页面，才额外添加：
 
 ```env
 ADMIN_PASSWORD=你自己的后台密码
 SESSION_SECRET=你自己的随机字符串
-PORT=3000
-DATA_DIR=/app/data
-IMAGE_NAME=duanxiaosheng/2025-blog-local-docker:latest
 ```
 
 ### 宝塔面板里怎么用
@@ -125,12 +120,12 @@ IMAGE_NAME=duanxiaosheng/2025-blog-local-docker:latest
 
 ### 2. 修改环境变量
 
-你可以直接修改 `docker-compose.yml`，或者自己复制一份 `.env.example` 做记录。
+默认情况下你不需要设置 `ADMIN_PASSWORD` 和 `SESSION_SECRET`：
 
-至少建议修改：
+- `ADMIN_PASSWORD` 不设置：首次访问后台/编辑页时初始化密码
+- `SESSION_SECRET` 不设置：程序首次启动自动生成并持久化到 `data/config/admin-auth.json`
 
-- `ADMIN_PASSWORD`
-- `SESSION_SECRET`
+如果你就是想固定它们，也可以自己在 compose 里加上。
 
 ### 3. 在宝塔 Docker / Compose 中创建项目
 

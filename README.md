@@ -15,8 +15,6 @@ mkdir -p /www/wwwroot/2025-blog-local-docker/data && docker run -d \
   --name 2025-blog-local-docker \
   -p 3000:3000 \
   -e NODE_ENV=production \
-  -e ADMIN_PASSWORD='Sheng123..' \
-  -e SESSION_SECRET='change-this-session-secret-after-deploy' \
   -e DATA_DIR=/app/data \
   -v /www/wwwroot/2025-blog-local-docker/data:/app/data \
   --restart unless-stopped \
@@ -29,10 +27,12 @@ mkdir -p /www/wwwroot/2025-blog-local-docker/data && docker run -d \
 http://服务器IP:3000
 ```
 
-**强烈建议你把上面两项改掉：**
+默认首次进入后台/编辑时，会提示你**初始化管理员密码**。
+如果你没有手动传 `SESSION_SECRET`，程序会自动生成一个随机字符串并持久化保存到：
 
-- `ADMIN_PASSWORD`
-- `SESSION_SECRET`
+```txt
+data/config/admin-auth.json
+```
 
 ---
 
@@ -87,7 +87,7 @@ http://服务器IP:3000
 ## 五、首次使用注意事项【必看】
 
 1、第一次进入编辑或后台时，系统会提示你初始化管理员密码。  
-如果你在启动容器时传了 `ADMIN_PASSWORD`，那后台密码就由这个环境变量控制。
+如果你在启动容器时手动传了 `ADMIN_PASSWORD`，那后台密码就由这个环境变量控制，初始化页面会被跳过。
 
 2、如果密码忘记？  
 - **环境变量模式**：直接改容器里的 `ADMIN_PASSWORD` 后重启容器
@@ -126,13 +126,14 @@ docker pull duanxiaosheng/2025-blog-local-docker:latest && docker rm -f 2025-blo
   --name 2025-blog-local-docker \
   -p 3000:3000 \
   -e NODE_ENV=production \
-  -e ADMIN_PASSWORD='你的后台密码' \
-  -e SESSION_SECRET='你自己的随机字符串' \
   -e DATA_DIR=/app/data \
   -v /www/wwwroot/2025-blog-local-docker/data:/app/data \
   --restart unless-stopped \
   duanxiaosheng/2025-blog-local-docker:latest
 ```
+
+如果你之前用的是默认初始化模式，更新后管理员密码和自动生成的 session secret 都会继续沿用 `data/` 里的内容。
+如果你本来就是手动传 `ADMIN_PASSWORD` / `SESSION_SECRET` 的，那更新时继续传同样的环境变量即可。
 
 ---
 
