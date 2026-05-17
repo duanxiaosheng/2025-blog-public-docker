@@ -27,6 +27,7 @@ import { HomeDraggableLayer } from '@/app/(home)/home-draggable-layer'
 import { useSiteAssetUrl } from '@/hooks/use-site-assets'
 
 const list = [
+
 	{
 		icon: ScrollOutlineSVG,
 		iconActive: ScrollFilledSVG,
@@ -68,6 +69,11 @@ const list = [
 const extraSize = 5
 const APPS_ICON_SCALE = 1.5
 const DEFAULT_ICON_SIZE_CLASS = 'h-7 w-7'
+const NAV_HIGHLIGHT_TRANSITION = {
+	type: 'spring' as const,
+	stiffness: 400,
+	damping: 30
+}
 
 const AVATAR_URL = '/api/site-assets/avatar'
 
@@ -79,12 +85,11 @@ export default function NavCard() {
 	const [hoveredIndex, setHoveredIndex] = useState<number>(0)
 	const [hoverRect, setHoverRect] = useState<{ centerX: number; top: number; width: number; height: number } | null>(null)
 	const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
+	const iconContainerRef = useRef<HTMLDivElement | null>(null)
 	const { siteContent, cardStyles } = useConfigStore()
 	const avatarUrl = useSiteAssetUrl('avatar')
 	const styles = cardStyles.navCard
 	const hiCardStyles = cardStyles.hiCard
-
-	const hoverLayoutId = useMemo(() => `nav-hover-${pathname === '/' ? 'home' : pathname.replace(/[^a-z0-9_-]/gi, '_')}`,[pathname])
 
 	const activeIndex = useMemo(() => {
 		const index = list.findIndex(item => pathname === item.href)
@@ -135,18 +140,22 @@ export default function NavCard() {
 		}
 
 		const activeItem = itemRefs.current[hoveredIndex]
-		if (!activeItem) {
+		const container = iconContainerRef.current
+		if (!activeItem || !container) {
 			setHoverRect(null)
 			return
 		}
 
+		const itemRect = activeItem.getBoundingClientRect()
+		const containerRect = container.getBoundingClientRect()
+
 		setHoverRect({
-			centerX: activeItem.offsetLeft + activeItem.offsetWidth / 2,
-			top: activeItem.offsetTop,
-			width: activeItem.offsetWidth,
-			height: activeItem.offsetHeight
+			centerX: itemRect.left - containerRect.left + itemRect.width / 2,
+			top: itemRect.top - containerRect.top,
+			width: itemRect.width,
+			height: itemRect.height
 		})
-	}, [form, hoveredIndex, maxSM, maxXS, pathname])
+	}, [form, hoveredIndex, maxSM, maxXS, pathname, size.width])
 
 
 	if (maxSM) position = { x: center.x - size.width / 2, y: 16 }
@@ -183,6 +192,7 @@ export default function NavCard() {
 							{form !== 'icons' && <div className='text-secondary mt-6 text-sm uppercase'>General</div>}
 
 							<div
+								ref={iconContainerRef}
 								className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0 flex min-w-0 flex-1 items-center justify-between gap-2 space-y-0 overflow-visible sm:gap-4')}
 								onMouseLeave={() => {
 									if (form === 'icons') setHoveredIndex(activeIndex ?? 0)
@@ -190,7 +200,6 @@ export default function NavCard() {
 								{(form !== 'icons' || hoverRect) && (
 									<motion.div
 										className='pointer-events-none absolute max-w-[230px] rounded-full border'
-										layoutId={hoverLayoutId}
 										initial={false}
 										animate={
 											form === 'icons'
@@ -202,11 +211,7 @@ export default function NavCard() {
 												  }
 												: { top: hoveredIndex * (itemHeight + 8), left: 0, width: '100%', height: itemHeight }
 										}
-										transition={{
-											type: 'spring',
-											stiffness: 400,
-											damping: 30
-										}}
+										transition={NAV_HIGHLIGHT_TRANSITION}
 										style={{ backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)' }}
 									/>
 								)}
