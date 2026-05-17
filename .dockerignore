@@ -1,5 +1,4 @@
 node_modules
-.next
 .git
 .gitignore
 Dockerfile*
@@ -9,3 +8,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 data
+
+# default: ignore local build output
+.next
+
+# release image packaging needs prebuilt standalone artifacts
+!.next
+!.next/standalone
+!.next/standalone/**
+!.next/static
+!.next/static/**
