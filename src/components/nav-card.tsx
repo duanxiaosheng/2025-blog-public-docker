@@ -82,6 +82,7 @@ export default function NavCard() {
 	const center = useCenterStore()
 	const [show, setShow] = useState(false)
 	const { maxSM, maxXS } = useSize()
+	const [navModeKey, setNavModeKey] = useState(0)
 	const [hoveredIndex, setHoveredIndex] = useState<number>(0)
 	const [hoverRect, setHoverRect] = useState<{ centerX: number; top: number; width: number; height: number } | null>(null)
 	const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
@@ -127,6 +128,10 @@ export default function NavCard() {
 		else if (form === 'icons') return { width: maxSM ? (maxXS ? 356 : 392) : Math.max(408, 88 + list.length * 44 + (list.length - 1) * 18 + 24), height: 64 }
 		else return { width: styles.width, height: Math.max(styles.height, 494) }
 	}, [form, styles, maxSM, maxXS])
+
+	useEffect(() => {
+		setNavModeKey(prev => prev + 1)
+	}, [form])
 
 	useEffect(() => {
 		if (form !== 'icons') return
@@ -192,6 +197,7 @@ export default function NavCard() {
 							{form !== 'icons' && <div className='text-secondary mt-6 text-sm uppercase'>General</div>}
 
 							<div
+								key={form === 'icons' ? `nav-icons-${navModeKey}-${pathname}` : `nav-${form}`}
 								ref={iconContainerRef}
 								className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0 flex min-w-0 flex-1 items-center justify-between gap-2 space-y-0 overflow-visible sm:gap-4')}
 								onMouseLeave={() => {
