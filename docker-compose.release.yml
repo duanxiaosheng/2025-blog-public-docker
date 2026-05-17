@@ -7,8 +7,6 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Sheng123..}
-      SESSION_SECRET: ${SESSION_SECRET:-change-this-session-secret-after-deploy}
       DATA_DIR: ${DATA_DIR:-/app/data}
     volumes:
       - ./data:${DATA_DIR:-/app/data}

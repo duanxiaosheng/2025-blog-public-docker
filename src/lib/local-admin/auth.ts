@@ -1,13 +1,13 @@
-import { createHash, timingSafeEqual } from 'crypto'
+import { createHash, randomBytes, timingSafeEqual } from 'crypto'
 import { readConfigJson, writeConfigJson } from './storage'
 
 const SESSION_COOKIE = 'blog_admin_session'
-const DEFAULT_SESSION_SECRET = 'blog-local-secret-change-me'
 const ADMIN_CONFIG_FILE = 'admin-auth.json'
 
 type AdminAuthConfig = {
 	passwordHash?: string
 	initializedAt?: string
+	sessionSecret?: string
 }
 
 function sha256(input: string) {
@@ -37,8 +37,13 @@ export async function initializeAdminPassword(password: string) {
 	return next
 }
 
-export function getSessionSecret() {
-	return process.env.SESSION_SECRET || DEFAULT_SESSION_SECRET
+export async function getSessionSecret() {
+	if (process.env.SESSION_SECRET) return process.env.SESSION_SECRET
+	const config = await getAdminAuthConfig()
+	if (config.sessionSecret) return config.sessionSecret
+	const sessionSecret = randomBytes(32).toString('hex')
+	await writeConfigJson(ADMIN_CONFIG_FILE, { ...config, sessionSecret })
+	return sessionSecret
 }
 
 export function getSessionCookieName() {
@@ -61,8 +66,9 @@ export async function verifyAdminPassword(password: string) {
 
 export async function createSessionToken() {
 	const passwordHash = (await getStoredAdminPasswordHash()) || 'uninitialized'
-	return sha256(`${getSessionSecret()}:${passwordHash}`)
+	return sha256(`${await getSessionSecret()}:${passwordHash}`)
 }
+
 
 export async function verifySessionToken(token?: string | null) {
 	if (!token) return false
