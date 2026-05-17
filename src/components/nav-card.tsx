@@ -71,7 +71,7 @@ const ICON_SLOT_SIZE = 44
 const ICON_GAP_DESKTOP = 18
 const ICON_GAP_MOBILE = 12
 const ICON_CONTAINER_PADDING = 12
-const APPS_ICON_SCALE = 1.5
+const APPS_ICON_SCALE = 1
 const DEFAULT_ICON_SIZE_CLASS = 'h-7 w-7'
 const AVATAR_URL = '/api/site-assets/avatar'
 
