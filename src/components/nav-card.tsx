@@ -70,7 +70,7 @@ const APPS_ICON_SCALE = 1.5
 const DEFAULT_ICON_SIZE_CLASS = 'h-7 w-7'
 const AVATAR_URL = '/api/site-assets/avatar'
 
-export default function NavCard() {
+	export default function NavCard() {
 	const pathname = usePathname()
 	const center = useCenterStore()
 	const [show, setShow] = useState(false)
@@ -79,6 +79,7 @@ export default function NavCard() {
 	const [highlightStyle, setHighlightStyle] = useState<React.CSSProperties | null>(null)
 	const [animateIconsHighlight, setAnimateIconsHighlight] = useState(false)
 	const [highlightReady, setHighlightReady] = useState(false)
+	const [debugInfo, setDebugInfo] = useState('')
 	const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
 	const iconContainerRef = useRef<HTMLDivElement | null>(null)
 	const previousFormRef = useRef<'full' | 'mini' | 'icons' | null>(null)
@@ -86,6 +87,7 @@ export default function NavCard() {
 	const avatarUrl = useSiteAssetUrl('avatar')
 	const styles = cardStyles.navCard
 	const hiCardStyles = cardStyles.hiCard
+	const isNavDebug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('navDebug') === '1'
 
 	const activeIndex = useMemo(() => {
 		const index = list.findIndex(item => pathname === item.href)
@@ -152,11 +154,11 @@ export default function NavCard() {
 		previousFormRef.current = form
 	}, [form, pathname])
 
-
 	useLayoutEffect(() => {
 		if (form === 'icons') {
 			if (!highlightReady) {
 				setHighlightStyle(null)
+				if (isNavDebug) setDebugInfo(`pathname=${pathname} | form=${form} | ready=0 | active=${activeIndex ?? -1} | hovered=${hoveredIndex}`)
 				return
 			}
 
@@ -164,28 +166,45 @@ export default function NavCard() {
 			const container = iconContainerRef.current
 			if (!activeItem || !container) {
 				setHighlightStyle(null)
+				if (isNavDebug) setDebugInfo(`pathname=${pathname} | form=${form} | ready=1 | missing=${!activeItem ? 'item' : 'container'} | active=${activeIndex ?? -1} | hovered=${hoveredIndex}`)
 				return
 			}
 
 			const itemRect = activeItem.getBoundingClientRect()
 			const containerRect = container.getBoundingClientRect()
-			setHighlightStyle({
+			const nextStyle = {
 				left: itemRect.left - containerRect.left - extraSize,
 				top: itemRect.top - containerRect.top - extraSize,
 				width: itemRect.width + extraSize * 2,
 				height: itemRect.height + extraSize * 2
-			})
+			}
+			setHighlightStyle(nextStyle)
+
+			if (isNavDebug) {
+				const itemMetrics = list
+					.map((item, index) => {
+						const el = itemRefs.current[index]
+						if (!el) return `${index}:${item.href}=null`
+						const rect = el.getBoundingClientRect()
+						return `${index}:${item.href}@${Math.round(rect.left - containerRect.left)},${Math.round(rect.width)}`
+					})
+					.join(' | ')
+				setDebugInfo(
+					`pathname=${pathname} | form=${form} | ready=1 | active=${activeIndex ?? -1} | hovered=${hoveredIndex} | highlight=${Math.round(Number(nextStyle.left))},${Math.round(Number(nextStyle.top))},${Math.round(Number(nextStyle.width))},${Math.round(Number(nextStyle.height))} | items=${itemMetrics}`
+				)
+			}
 			return
 		}
 
-		setHighlightStyle({
+		const nextStyle = {
 			left: 0,
 			top: hoveredIndex * (itemHeight + 8),
 			width: '100%',
 			height: itemHeight
-		})
-	}, [form, hoveredIndex, itemHeight, maxSM, maxXS, pathname, size.width, highlightReady])
-
+		}
+		setHighlightStyle(nextStyle)
+		if (isNavDebug) setDebugInfo(`pathname=${pathname} | form=${form} | active=${activeIndex ?? -1} | hovered=${hoveredIndex} | highlight=0,${hoveredIndex * (itemHeight + 8)},100%,${itemHeight}`)
+	}, [form, hoveredIndex, itemHeight, maxSM, maxXS, pathname, size.width, highlightReady, isNavDebug, activeIndex])
 
 	if (maxSM) position = { x: center.x - size.width / 2, y: 16 }
 
@@ -220,6 +239,7 @@ export default function NavCard() {
 					{(form === 'full' || form === 'icons') && (
 						<>
 							{form !== 'icons' && <div className='text-secondary mt-6 text-sm uppercase'>General</div>}
+							{isNavDebug && debugInfo && <div className='mb-2 rounded-2xl border bg-black/70 px-3 py-2 text-xs leading-tight break-all text-white'>{debugInfo}</div>}
 
 							<div
 								ref={iconContainerRef}
