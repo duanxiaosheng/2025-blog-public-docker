@@ -2,7 +2,7 @@
 
 import Card from '@/components/card'
 import Link from 'next/link'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { useCenterStore } from '@/hooks/use-center'
 import { CARD_SPACING } from '@/consts'
@@ -65,7 +65,12 @@ const list = [
 	}
 ]
 
-const extraSize = 5
+const FULL_HIGHLIGHT_HEIGHT = 28
+const FULL_HIGHLIGHT_GAP = 8
+const ICON_SLOT_SIZE = 44
+const ICON_GAP_DESKTOP = 18
+const ICON_GAP_MOBILE = 12
+const ICON_CONTAINER_PADDING = 12
 const APPS_ICON_SCALE = 1.5
 const DEFAULT_ICON_SIZE_CLASS = 'h-7 w-7'
 const AVATAR_URL = '/api/site-assets/avatar'
@@ -76,11 +81,6 @@ export default function NavCard() {
 	const [show, setShow] = useState(false)
 	const { maxSM, maxXS } = useSize()
 	const [hoverIndex, setHoverIndex] = useState<number | null>(null)
-	const [highlightStyle, setHighlightStyle] = useState<React.CSSProperties | null>(null)
-	const [animateIconsHighlight, setAnimateIconsHighlight] = useState(false)
-	const [highlightReady, setHighlightReady] = useState(false)
-	const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
-	const iconContainerRef = useRef<HTMLDivElement | null>(null)
 	const previousFormRef = useRef<'full' | 'mini' | 'icons' | null>(null)
 	const previousDisplayIndexRef = useRef<number | null>(null)
 	const { siteContent, cardStyles } = useConfigStore()
@@ -104,8 +104,22 @@ export default function NavCard() {
 	}, [pathname])
 	if (maxSM) form = 'icons'
 
-	const itemHeight = form === 'full' ? 52 : 28
 	const displayIndex = hoverIndex ?? activeIndex
+	const iconGap = maxSM ? ICON_GAP_MOBILE : ICON_GAP_DESKTOP
+	const iconTrackWidth = list.length * ICON_SLOT_SIZE + (list.length - 1) * iconGap
+	const iconHighlightLeft = displayIndex * (ICON_SLOT_SIZE + iconGap)
+	const iconHighlightStyle = {
+		left: iconHighlightLeft,
+		top: 0,
+		width: ICON_SLOT_SIZE,
+		height: ICON_SLOT_SIZE
+	}
+	const fullHighlightStyle = {
+		left: 0,
+		top: displayIndex * (FULL_HIGHLIGHT_HEIGHT + FULL_HIGHLIGHT_GAP),
+		width: '100%',
+		height: FULL_HIGHLIGHT_HEIGHT
+	} as const
 
 	let position = useMemo(() => {
 		if (form === 'full') {
@@ -122,73 +136,25 @@ export default function NavCard() {
 
 	const size = useMemo(() => {
 		if (form === 'mini') return { width: 64, height: 64 }
-		else if (form === 'icons') return { width: maxSM ? (maxXS ? 356 : 392) : Math.max(408, 88 + list.length * 44 + (list.length - 1) * 18 + 24), height: 64 }
-		else return { width: styles.width, height: Math.max(styles.height, 494) }
-	}, [form, styles, maxSM, maxXS])
+		if (form === 'icons') return { width: iconTrackWidth + ICON_CONTAINER_PADDING * 2 + 40 + 24, height: 64 }
+		return { width: styles.width, height: Math.max(styles.height, 494) }
+	}, [form, styles, iconTrackWidth])
 
 	useEffect(() => {
 		setHoverIndex(null)
 	}, [pathname])
 
-	useEffect(() => {
+	const shouldAnimateIcons = useMemo(() => {
 		const previousForm = previousFormRef.current
-		if (form !== 'icons') {
-			setAnimateIconsHighlight(false)
-			setHighlightReady(true)
-			previousFormRef.current = form
-			previousDisplayIndexRef.current = displayIndex
-			return
-		}
+		const previousDisplayIndex = previousDisplayIndexRef.current
+		const animate = previousForm === 'icons' && previousDisplayIndex !== null && previousDisplayIndex !== displayIndex
+		return animate
+	}, [displayIndex])
 
-		if (previousForm !== 'icons') {
-			setAnimateIconsHighlight(false)
-			setHighlightReady(false)
-			const frame = window.requestAnimationFrame(() => {
-				setHighlightReady(true)
-			})
-			previousFormRef.current = form
-			previousDisplayIndexRef.current = displayIndex
-			return () => window.cancelAnimationFrame(frame)
-		}
-
-		setAnimateIconsHighlight(previousDisplayIndexRef.current !== null && previousDisplayIndexRef.current !== displayIndex)
-		setHighlightReady(true)
+	useEffect(() => {
 		previousFormRef.current = form
 		previousDisplayIndexRef.current = displayIndex
-	}, [form, pathname, displayIndex])
-
-	useLayoutEffect(() => {
-		if (form === 'icons') {
-			if (!highlightReady) {
-				setHighlightStyle(null)
-				return
-			}
-
-			const activeItem = itemRefs.current[displayIndex]
-			const container = iconContainerRef.current
-			if (!activeItem || !container) {
-				setHighlightStyle(null)
-				return
-			}
-
-			const itemRect = activeItem.getBoundingClientRect()
-			const containerRect = container.getBoundingClientRect()
-			setHighlightStyle({
-				left: itemRect.left - containerRect.left - extraSize,
-				top: itemRect.top - containerRect.top - extraSize,
-				width: itemRect.width + extraSize * 2,
-				height: itemRect.height + extraSize * 2
-			})
-			return
-		}
-
-		setHighlightStyle({
-			left: 0,
-			top: displayIndex * (itemHeight + 8),
-			width: '100%',
-			height: itemHeight
-		})
-	}, [form, displayIndex, itemHeight, maxSM, maxXS, pathname, size.width, highlightReady])
+	}, [form, displayIndex])
 
 	if (maxSM) position = { x: center.x - size.width / 2, y: 16 }
 
@@ -202,20 +168,18 @@ export default function NavCard() {
 					x={position.x}
 					y={position.y}
 					enterScale={form === 'icons' ? 1 : 0.6}
-					className={clsx(form === 'mini' && 'overflow-hidden p-3', form === 'icons' && 'overflow-visible flex items-center gap-2 px-4 py-2 sm:gap-4', form === 'full' && 'p-6')}>
+					className={clsx(form === 'mini' && 'overflow-hidden p-3', form === 'icons' && 'overflow-visible flex items-center gap-3 px-3 py-2', form === 'full' && 'p-6')}>
 					{form === 'full' && siteContent.enableChristmas && (
-						<>
-							<img
-								src='/images/christmas/snow-4.webp'
-								alt='Christmas decoration'
-								className='pointer-events-none absolute'
-								style={{ width: 160, left: -18, top: -20, opacity: 0.9 }}
-							/>
-						</>
+						<img
+							src='/images/christmas/snow-4.webp'
+							alt='Christmas decoration'
+							className='pointer-events-none absolute'
+							style={{ width: 160, left: -18, top: -20, opacity: 0.9 }}
+						/>
 					)}
 
 					<Link className={cn('flex items-center gap-3', form === 'icons' && 'shrink-0')} href='/'>
-						<img src={avatarUrl || AVATAR_URL} alt='avatar' width={40} height={40} style={{ boxShadow: ' 0 12px 20px -5px #E2D9CE' }} className='h-10 w-10 shrink-0 rounded-full object-cover' />
+						<img src={avatarUrl || AVATAR_URL} alt='avatar' width={40} height={40} style={{ boxShadow: '0 12px 20px -5px #E2D9CE' }} className='h-10 w-10 shrink-0 rounded-full object-cover' />
 						{form === 'full' && <span className='font-averia mt-1 text-2xl leading-none font-medium'>{siteContent.meta.title}</span>}
 						{form === 'full' && <span className='text-brand mt-2 text-xs font-medium'>(开发中)</span>}
 					</Link>
@@ -225,56 +189,68 @@ export default function NavCard() {
 							{form !== 'icons' && <div className='text-secondary mt-6 text-sm uppercase'>General</div>}
 
 							<div
-								ref={iconContainerRef}
-								className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0 flex min-w-0 flex-1 items-center justify-between gap-2 space-y-0 overflow-visible sm:gap-4')}
-								onMouseLeave={() => {
-									setHoverIndex(null)
-								}}>
-								{highlightStyle &&
-									highlightReady &&
-									(form === 'icons' ? (
+								className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0')}
+								onMouseLeave={() => setHoverIndex(null)}>
+								{form === 'icons' ? (
+									<div className='relative' style={{ width: iconTrackWidth, height: ICON_SLOT_SIZE }}>
 										<motion.div
-											className='pointer-events-none absolute max-w-[230px] rounded-full border'
+											className='pointer-events-none absolute rounded-full border'
 											initial={false}
-											animate={highlightStyle}
-											transition={animateIconsHighlight ? { type: 'spring', stiffness: 380, damping: 32 } : { duration: 0 }}
+											animate={iconHighlightStyle}
+											transition={shouldAnimateIcons ? { type: 'spring', stiffness: 380, damping: 32 } : { duration: 0 }}
 											style={{ backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)' }}
 										/>
-									) : (
+
+										<div className='absolute inset-0 flex items-center' style={{ gap: iconGap }}>
+											{list.map((item, index) => {
+												const isAppsItem = item.href === '/apps'
+												const isCurrent = displayIndex === index
+												const iconWrapperStyle = isAppsItem ? { transform: `scale(${APPS_ICON_SCALE})` } : undefined
+
+												return (
+													<Link
+														key={item.href}
+														href={item.href}
+														className='relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full'
+														onMouseEnter={() => setHoverIndex(index)}>
+														<div className='flex h-7 w-7 shrink-0 items-center justify-center' style={iconWrapperStyle}>
+															{isCurrent ? <item.iconActive className={cn('text-brand absolute', DEFAULT_ICON_SIZE_CLASS)} /> : <item.icon className={cn('absolute', DEFAULT_ICON_SIZE_CLASS)} />}
+														</div>
+													</Link>
+												)
+											})}
+										</div>
+									</div>
+								) : (
+									<>
 										<div
 											className='pointer-events-none absolute rounded-full border transition-all duration-200 ease-out'
 											style={{
-												...highlightStyle,
+												...fullHighlightStyle,
 												backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)'
 											}}
 										/>
-									))}
 
-								{list.map((item, index) => {
-									const isAppsItem = item.href === '/apps'
-									const iconSizeClass = DEFAULT_ICON_SIZE_CLASS
-									const iconWrapperStyle = isAppsItem ? { transform: `scale(${APPS_ICON_SCALE})` } : undefined
-									const isCurrent = displayIndex === index
+										{list.map((item, index) => {
+											const isAppsItem = item.href === '/apps'
+											const isCurrent = displayIndex === index
+											const iconWrapperStyle = isAppsItem ? { transform: `scale(${APPS_ICON_SCALE})` } : undefined
 
-									return (
-										<Link
-											ref={element => {
-												itemRefs.current[index] = element
-											}}
-											key={item.href}
-											href={item.href}
-											className={cn(
-												'text-secondary text-md relative z-10 flex items-center gap-3 rounded-full px-5 py-3',
-												form === 'icons' && 'flex h-11 w-11 shrink-0 items-center justify-center p-0'
-											)}
-											onMouseEnter={() => setHoverIndex(index)}>
-											<div className='flex h-7 w-7 shrink-0 items-center justify-center' style={iconWrapperStyle}>
-												{isCurrent ? <item.iconActive className={cn('text-brand absolute', iconSizeClass)} /> : <item.icon className={cn('absolute', iconSizeClass)} />}
-											</div>
-											{form !== 'icons' && <span className={clsx(isCurrent && 'text-primary font-medium')}>{item.label}</span>}
-										</Link>
-									)
-								})}
+											return (
+												<Link
+													key={item.href}
+													href={item.href}
+													className='text-secondary text-md relative z-10 flex items-center gap-3 rounded-full px-5 py-3'
+													onMouseEnter={() => setHoverIndex(index)}>
+													<div className='flex h-7 w-7 shrink-0 items-center justify-center' style={iconWrapperStyle}>
+														{isCurrent ? <item.iconActive className={cn('text-brand absolute', DEFAULT_ICON_SIZE_CLASS)} /> : <item.icon className={cn('absolute', DEFAULT_ICON_SIZE_CLASS)} />}
+													</div>
+													<span className={clsx(isCurrent && 'text-primary font-medium')}>{item.label}</span>
+												</Link>
+											)
+										})}
+									</>
+								)}
 							</div>
 						</>
 					)}
