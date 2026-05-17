@@ -1,7 +1,9 @@
 FROM node:20-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm install --legacy-peer-deps
+RUN npm install -g npm@11.14.1 \
+  && npm install --legacy-peer-deps \
+  && test -x node_modules/.bin/next
 
 FROM node:20-bookworm-slim AS builder
 WORKDIR /app
