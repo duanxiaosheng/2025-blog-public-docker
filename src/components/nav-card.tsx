@@ -78,6 +78,7 @@ export default function NavCard() {
 	const [hoveredIndex, setHoveredIndex] = useState<number>(0)
 	const [highlightStyle, setHighlightStyle] = useState<React.CSSProperties | null>(null)
 	const [animateIconsHighlight, setAnimateIconsHighlight] = useState(false)
+	const [highlightReady, setHighlightReady] = useState(false)
 	const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
 	const iconContainerRef = useRef<HTMLDivElement | null>(null)
 	const previousFormRef = useRef<'full' | 'mini' | 'icons' | null>(null)
@@ -131,16 +132,34 @@ export default function NavCard() {
 		const previousForm = previousFormRef.current
 		if (form !== 'icons') {
 			setAnimateIconsHighlight(false)
+			setHighlightReady(true)
 			previousFormRef.current = form
 			return
 		}
 
-		setAnimateIconsHighlight(previousForm === 'icons')
+		if (previousForm !== 'icons') {
+			setAnimateIconsHighlight(false)
+			setHighlightReady(false)
+			const frame = window.requestAnimationFrame(() => {
+				setHighlightReady(true)
+			})
+			previousFormRef.current = form
+			return () => window.cancelAnimationFrame(frame)
+		}
+
+		setAnimateIconsHighlight(true)
+		setHighlightReady(true)
 		previousFormRef.current = form
 	}, [form, pathname])
 
+
 	useLayoutEffect(() => {
 		if (form === 'icons') {
+			if (!highlightReady) {
+				setHighlightStyle(null)
+				return
+			}
+
 			const activeItem = itemRefs.current[hoveredIndex]
 			const container = iconContainerRef.current
 			if (!activeItem || !container) {
@@ -165,7 +184,8 @@ export default function NavCard() {
 			width: '100%',
 			height: itemHeight
 		})
-	}, [form, hoveredIndex, itemHeight, maxSM, maxXS, pathname, size.width])
+	}, [form, hoveredIndex, itemHeight, maxSM, maxXS, pathname, size.width, highlightReady])
+
 
 	if (maxSM) position = { x: center.x - size.width / 2, y: 16 }
 
@@ -207,6 +227,7 @@ export default function NavCard() {
 									if (form === 'icons') setHoveredIndex(activeIndex ?? 0)
 								}}>
 								{highlightStyle &&
+									highlightReady &&
 									(form === 'icons' ? (
 										<motion.div
 											className='pointer-events-none absolute max-w-[230px] rounded-full border'
