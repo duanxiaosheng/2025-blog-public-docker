@@ -3,7 +3,6 @@
 import Card from '@/components/card'
 import Link from 'next/link'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { motion } from 'motion/react'
 import { useCenterStore } from '@/hooks/use-center'
 import { CARD_SPACING } from '@/consts'
 import ScrollOutlineSVG from '@/svgs/scroll-outline.svg'
@@ -27,7 +26,6 @@ import { HomeDraggableLayer } from '@/app/(home)/home-draggable-layer'
 import { useSiteAssetUrl } from '@/hooks/use-site-assets'
 
 const list = [
-
 	{
 		icon: ScrollOutlineSVG,
 		iconActive: ScrollFilledSVG,
@@ -69,12 +67,6 @@ const list = [
 const extraSize = 5
 const APPS_ICON_SCALE = 1.5
 const DEFAULT_ICON_SIZE_CLASS = 'h-7 w-7'
-const NAV_HIGHLIGHT_TRANSITION = {
-	type: 'spring' as const,
-	stiffness: 400,
-	damping: 30
-}
-
 const AVATAR_URL = '/api/site-assets/avatar'
 
 export default function NavCard() {
@@ -82,9 +74,8 @@ export default function NavCard() {
 	const center = useCenterStore()
 	const [show, setShow] = useState(false)
 	const { maxSM, maxXS } = useSize()
-	const [navModeKey, setNavModeKey] = useState(0)
 	const [hoveredIndex, setHoveredIndex] = useState<number>(0)
-	const [hoverRect, setHoverRect] = useState<{ centerX: number; top: number; width: number; height: number } | null>(null)
+	const [highlightStyle, setHighlightStyle] = useState<React.CSSProperties | null>(null)
 	const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
 	const iconContainerRef = useRef<HTMLDivElement | null>(null)
 	const { siteContent, cardStyles } = useConfigStore()
@@ -130,38 +121,36 @@ export default function NavCard() {
 	}, [form, styles, maxSM, maxXS])
 
 	useEffect(() => {
-		setNavModeKey(prev => prev + 1)
-	}, [form])
-
-	useEffect(() => {
-		if (form !== 'icons') return
 		setHoveredIndex(activeIndex ?? 0)
-	}, [activeIndex, form])
+	}, [activeIndex])
 
 	useLayoutEffect(() => {
-		if (form !== 'icons') {
-			setHoverRect(null)
+		if (form === 'icons') {
+			const activeItem = itemRefs.current[hoveredIndex]
+			const container = iconContainerRef.current
+			if (!activeItem || !container) {
+				setHighlightStyle(null)
+				return
+			}
+
+			const itemRect = activeItem.getBoundingClientRect()
+			const containerRect = container.getBoundingClientRect()
+			setHighlightStyle({
+				left: itemRect.left - containerRect.left - extraSize,
+				top: itemRect.top - containerRect.top - extraSize,
+				width: itemRect.width + extraSize * 2,
+				height: itemRect.height + extraSize * 2
+			})
 			return
 		}
 
-		const activeItem = itemRefs.current[hoveredIndex]
-		const container = iconContainerRef.current
-		if (!activeItem || !container) {
-			setHoverRect(null)
-			return
-		}
-
-		const itemRect = activeItem.getBoundingClientRect()
-		const containerRect = container.getBoundingClientRect()
-
-		setHoverRect({
-			centerX: itemRect.left - containerRect.left + itemRect.width / 2,
-			top: itemRect.top - containerRect.top,
-			width: itemRect.width,
-			height: itemRect.height
+		setHighlightStyle({
+			left: 0,
+			top: hoveredIndex * (itemHeight + 8),
+			width: '100%',
+			height: itemHeight
 		})
-	}, [form, hoveredIndex, maxSM, maxXS, pathname, size.width])
-
+	}, [form, hoveredIndex, itemHeight, maxSM, maxXS, pathname, size.width])
 
 	if (maxSM) position = { x: center.x - size.width / 2, y: 16 }
 
@@ -197,28 +186,18 @@ export default function NavCard() {
 							{form !== 'icons' && <div className='text-secondary mt-6 text-sm uppercase'>General</div>}
 
 							<div
-								key={form === 'icons' ? `nav-icons-${navModeKey}-${pathname}` : `nav-${form}`}
 								ref={iconContainerRef}
 								className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0 flex min-w-0 flex-1 items-center justify-between gap-2 space-y-0 overflow-visible sm:gap-4')}
 								onMouseLeave={() => {
 									if (form === 'icons') setHoveredIndex(activeIndex ?? 0)
 								}}>
-								{(form !== 'icons' || hoverRect) && (
-									<motion.div
-										className='pointer-events-none absolute max-w-[230px] rounded-full border'
-										initial={false}
-										animate={
-											form === 'icons'
-												? {
-														left: (hoverRect?.centerX ?? itemHeight / 2) - ((hoverRect?.width ?? itemHeight) + extraSize * 2) / 2,
-														top: (hoverRect?.top ?? 0) - extraSize,
-														width: (hoverRect?.width ?? itemHeight) + extraSize * 2,
-														height: (hoverRect?.height ?? itemHeight) + extraSize * 2
-												  }
-												: { top: hoveredIndex * (itemHeight + 8), left: 0, width: '100%', height: itemHeight }
-										}
-										transition={NAV_HIGHLIGHT_TRANSITION}
-										style={{ backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)' }}
+								{highlightStyle && (
+									<div
+										className='pointer-events-none absolute max-w-[230px] rounded-full border transition-all duration-200 ease-out'
+										style={{
+											...highlightStyle,
+											backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)'
+										}}
 									/>
 								)}
 
