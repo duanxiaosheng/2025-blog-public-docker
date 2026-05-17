@@ -28,7 +28,10 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: |
+          rm -f .npmrc
+          npm install --include=dev --legacy-peer-deps
+          test -x node_modules/.bin/next
 
       - name: Build Next standalone output
         env:
