@@ -84,6 +84,8 @@ export default function NavCard() {
 	const styles = cardStyles.navCard
 	const hiCardStyles = cardStyles.hiCard
 
+	const hoverLayoutId = useMemo(() => `nav-hover-${pathname === '/' ? 'home' : pathname.replace(/[^a-z0-9_-]/gi, '_')}`,[pathname])
+
 	const activeIndex = useMemo(() => {
 		const index = list.findIndex(item => pathname === item.href)
 		return index >= 0 ? index : undefined
@@ -133,7 +135,10 @@ export default function NavCard() {
 		}
 
 		const activeItem = itemRefs.current[hoveredIndex]
-		if (!activeItem) return
+		if (!activeItem) {
+			setHoverRect(null)
+			return
+		}
 
 		setHoverRect({
 			centerX: activeItem.offsetLeft + activeItem.offsetWidth / 2,
@@ -185,7 +190,7 @@ export default function NavCard() {
 								{(form !== 'icons' || hoverRect) && (
 									<motion.div
 										className='pointer-events-none absolute max-w-[230px] rounded-full border'
-										layoutId='nav-hover'
+										layoutId={hoverLayoutId}
 										initial={false}
 										animate={
 											form === 'icons'
