@@ -70,28 +70,27 @@ const APPS_ICON_SCALE = 1.5
 const DEFAULT_ICON_SIZE_CLASS = 'h-7 w-7'
 const AVATAR_URL = '/api/site-assets/avatar'
 
-	export default function NavCard() {
+export default function NavCard() {
 	const pathname = usePathname()
 	const center = useCenterStore()
 	const [show, setShow] = useState(false)
 	const { maxSM, maxXS } = useSize()
-	const [hoveredIndex, setHoveredIndex] = useState<number>(0)
+	const [hoverIndex, setHoverIndex] = useState<number | null>(null)
 	const [highlightStyle, setHighlightStyle] = useState<React.CSSProperties | null>(null)
 	const [animateIconsHighlight, setAnimateIconsHighlight] = useState(false)
 	const [highlightReady, setHighlightReady] = useState(false)
-	const [debugInfo, setDebugInfo] = useState('')
 	const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
 	const iconContainerRef = useRef<HTMLDivElement | null>(null)
 	const previousFormRef = useRef<'full' | 'mini' | 'icons' | null>(null)
+	const previousDisplayIndexRef = useRef<number | null>(null)
 	const { siteContent, cardStyles } = useConfigStore()
 	const avatarUrl = useSiteAssetUrl('avatar')
 	const styles = cardStyles.navCard
 	const hiCardStyles = cardStyles.hiCard
-	const isNavDebug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('navDebug') === '1'
 
 	const activeIndex = useMemo(() => {
 		const index = list.findIndex(item => pathname === item.href)
-		return index >= 0 ? index : undefined
+		return index >= 0 ? index : 0
 	}, [pathname])
 
 	useEffect(() => {
@@ -106,6 +105,7 @@ const AVATAR_URL = '/api/site-assets/avatar'
 	if (maxSM) form = 'icons'
 
 	const itemHeight = form === 'full' ? 52 : 28
+	const displayIndex = hoverIndex ?? activeIndex
 
 	let position = useMemo(() => {
 		if (form === 'full') {
@@ -127,8 +127,8 @@ const AVATAR_URL = '/api/site-assets/avatar'
 	}, [form, styles, maxSM, maxXS])
 
 	useEffect(() => {
-		setHoveredIndex(activeIndex ?? 0)
-	}, [activeIndex])
+		setHoverIndex(null)
+	}, [pathname])
 
 	useEffect(() => {
 		const previousForm = previousFormRef.current
@@ -136,6 +136,7 @@ const AVATAR_URL = '/api/site-assets/avatar'
 			setAnimateIconsHighlight(false)
 			setHighlightReady(true)
 			previousFormRef.current = form
+			previousDisplayIndexRef.current = displayIndex
 			return
 		}
 
@@ -146,65 +147,48 @@ const AVATAR_URL = '/api/site-assets/avatar'
 				setHighlightReady(true)
 			})
 			previousFormRef.current = form
+			previousDisplayIndexRef.current = displayIndex
 			return () => window.cancelAnimationFrame(frame)
 		}
 
-		setAnimateIconsHighlight(true)
+		setAnimateIconsHighlight(previousDisplayIndexRef.current !== null && previousDisplayIndexRef.current !== displayIndex)
 		setHighlightReady(true)
 		previousFormRef.current = form
-	}, [form, pathname])
+		previousDisplayIndexRef.current = displayIndex
+	}, [form, pathname, displayIndex])
 
 	useLayoutEffect(() => {
 		if (form === 'icons') {
 			if (!highlightReady) {
 				setHighlightStyle(null)
-				if (isNavDebug) setDebugInfo(`pathname=${pathname} | form=${form} | ready=0 | active=${activeIndex ?? -1} | hovered=${hoveredIndex}`)
 				return
 			}
 
-			const activeItem = itemRefs.current[hoveredIndex]
+			const activeItem = itemRefs.current[displayIndex]
 			const container = iconContainerRef.current
 			if (!activeItem || !container) {
 				setHighlightStyle(null)
-				if (isNavDebug) setDebugInfo(`pathname=${pathname} | form=${form} | ready=1 | missing=${!activeItem ? 'item' : 'container'} | active=${activeIndex ?? -1} | hovered=${hoveredIndex}`)
 				return
 			}
 
 			const itemRect = activeItem.getBoundingClientRect()
 			const containerRect = container.getBoundingClientRect()
-			const nextStyle = {
+			setHighlightStyle({
 				left: itemRect.left - containerRect.left - extraSize,
 				top: itemRect.top - containerRect.top - extraSize,
 				width: itemRect.width + extraSize * 2,
 				height: itemRect.height + extraSize * 2
-			}
-			setHighlightStyle(nextStyle)
-
-			if (isNavDebug) {
-				const itemMetrics = list
-					.map((item, index) => {
-						const el = itemRefs.current[index]
-						if (!el) return `${index}:${item.href}=null`
-						const rect = el.getBoundingClientRect()
-						return `${index}:${item.href}@${Math.round(rect.left - containerRect.left)},${Math.round(rect.width)}`
-					})
-					.join(' | ')
-				setDebugInfo(
-					`pathname=${pathname} | form=${form} | ready=1 | active=${activeIndex ?? -1} | hovered=${hoveredIndex} | highlight=${Math.round(Number(nextStyle.left))},${Math.round(Number(nextStyle.top))},${Math.round(Number(nextStyle.width))},${Math.round(Number(nextStyle.height))} | items=${itemMetrics}`
-				)
-			}
+			})
 			return
 		}
 
-		const nextStyle = {
+		setHighlightStyle({
 			left: 0,
-			top: hoveredIndex * (itemHeight + 8),
+			top: displayIndex * (itemHeight + 8),
 			width: '100%',
 			height: itemHeight
-		}
-		setHighlightStyle(nextStyle)
-		if (isNavDebug) setDebugInfo(`pathname=${pathname} | form=${form} | active=${activeIndex ?? -1} | hovered=${hoveredIndex} | highlight=0,${hoveredIndex * (itemHeight + 8)},100%,${itemHeight}`)
-	}, [form, hoveredIndex, itemHeight, maxSM, maxXS, pathname, size.width, highlightReady, isNavDebug, activeIndex])
+		})
+	}, [form, displayIndex, itemHeight, maxSM, maxXS, pathname, size.width, highlightReady])
 
 	if (maxSM) position = { x: center.x - size.width / 2, y: 16 }
 
@@ -239,13 +223,12 @@ const AVATAR_URL = '/api/site-assets/avatar'
 					{(form === 'full' || form === 'icons') && (
 						<>
 							{form !== 'icons' && <div className='text-secondary mt-6 text-sm uppercase'>General</div>}
-							{isNavDebug && debugInfo && <div className='mb-2 rounded-2xl border bg-black/70 px-3 py-2 text-xs leading-tight break-all text-white'>{debugInfo}</div>}
 
 							<div
 								ref={iconContainerRef}
 								className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0 flex min-w-0 flex-1 items-center justify-between gap-2 space-y-0 overflow-visible sm:gap-4')}
 								onMouseLeave={() => {
-									if (form === 'icons') setHoveredIndex(activeIndex ?? 0)
+									setHoverIndex(null)
 								}}>
 								{highlightStyle &&
 									highlightReady &&
@@ -271,6 +254,7 @@ const AVATAR_URL = '/api/site-assets/avatar'
 									const isAppsItem = item.href === '/apps'
 									const iconSizeClass = DEFAULT_ICON_SIZE_CLASS
 									const iconWrapperStyle = isAppsItem ? { transform: `scale(${APPS_ICON_SCALE})` } : undefined
+									const isCurrent = displayIndex === index
 
 									return (
 										<Link
@@ -283,11 +267,11 @@ const AVATAR_URL = '/api/site-assets/avatar'
 												'text-secondary text-md relative z-10 flex items-center gap-3 rounded-full px-5 py-3',
 												form === 'icons' && 'flex h-11 w-11 shrink-0 items-center justify-center p-0'
 											)}
-											onMouseEnter={() => setHoveredIndex(index)}>
+											onMouseEnter={() => setHoverIndex(index)}>
 											<div className='flex h-7 w-7 shrink-0 items-center justify-center' style={iconWrapperStyle}>
-												{hoveredIndex == index ? <item.iconActive className={cn('text-brand absolute', iconSizeClass)} /> : <item.icon className={cn('absolute', iconSizeClass)} />}
+												{isCurrent ? <item.iconActive className={cn('text-brand absolute', iconSizeClass)} /> : <item.icon className={cn('absolute', iconSizeClass)} />}
 											</div>
-											{form !== 'icons' && <span className={clsx(index == hoveredIndex && 'text-primary font-medium')}>{item.label}</span>}
+											{form !== 'icons' && <span className={clsx(isCurrent && 'text-primary font-medium')}>{item.label}</span>}
 										</Link>
 									)
 								})}
