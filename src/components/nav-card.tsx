@@ -3,6 +3,7 @@
 import Card from '@/components/card'
 import Link from 'next/link'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { motion } from 'motion/react'
 import { useCenterStore } from '@/hooks/use-center'
 import { CARD_SPACING } from '@/consts'
 import ScrollOutlineSVG from '@/svgs/scroll-outline.svg'
@@ -76,8 +77,10 @@ export default function NavCard() {
 	const { maxSM, maxXS } = useSize()
 	const [hoveredIndex, setHoveredIndex] = useState<number>(0)
 	const [highlightStyle, setHighlightStyle] = useState<React.CSSProperties | null>(null)
+	const [animateIconsHighlight, setAnimateIconsHighlight] = useState(false)
 	const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
 	const iconContainerRef = useRef<HTMLDivElement | null>(null)
+	const previousFormRef = useRef<'full' | 'mini' | 'icons' | null>(null)
 	const { siteContent, cardStyles } = useConfigStore()
 	const avatarUrl = useSiteAssetUrl('avatar')
 	const styles = cardStyles.navCard
@@ -123,6 +126,18 @@ export default function NavCard() {
 	useEffect(() => {
 		setHoveredIndex(activeIndex ?? 0)
 	}, [activeIndex])
+
+	useEffect(() => {
+		const previousForm = previousFormRef.current
+		if (form !== 'icons') {
+			setAnimateIconsHighlight(false)
+			previousFormRef.current = form
+			return
+		}
+
+		setAnimateIconsHighlight(previousForm === 'icons')
+		previousFormRef.current = form
+	}, [form, pathname])
 
 	useLayoutEffect(() => {
 		if (form === 'icons') {
@@ -191,15 +206,24 @@ export default function NavCard() {
 								onMouseLeave={() => {
 									if (form === 'icons') setHoveredIndex(activeIndex ?? 0)
 								}}>
-								{highlightStyle && (
-									<div
-										className='pointer-events-none absolute max-w-[230px] rounded-full border transition-all duration-200 ease-out'
-										style={{
-											...highlightStyle,
-											backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)'
-										}}
-									/>
-								)}
+								{highlightStyle &&
+									(form === 'icons' ? (
+										<motion.div
+											className='pointer-events-none absolute max-w-[230px] rounded-full border'
+											initial={false}
+											animate={highlightStyle}
+											transition={animateIconsHighlight ? { type: 'spring', stiffness: 380, damping: 32 } : { duration: 0 }}
+											style={{ backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)' }}
+										/>
+									) : (
+										<div
+											className='pointer-events-none absolute rounded-full border transition-all duration-200 ease-out'
+											style={{
+												...highlightStyle,
+												backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)'
+											}}
+										/>
+									))}
 
 								{list.map((item, index) => {
 									const isAppsItem = item.href === '/apps'
