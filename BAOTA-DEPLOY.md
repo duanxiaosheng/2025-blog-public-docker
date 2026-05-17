@@ -1,12 +1,118 @@
 # 宝塔 Docker 部署说明
 
+这份文档分两种方式：
+
+- **方式 A：直接拉 Docker Hub 镜像一键部署（推荐）**
+- **方式 B：上传源码后用 compose 本地 build**
+
+如果你只是想在宝塔里尽快跑起来，优先用方式 A，少折腾。
+
+---
+
+## 一、方式 A：Docker Hub 一键部署（推荐）
+
+### 1. 先准备数据目录
+
+```bash
+mkdir -p /www/wwwroot/2025-blog-local-docker/data
+```
+
+### 2. 一条命令启动
+
+```bash
+docker run -d \
+  --name 2025-blog-local-docker \
+  -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e ADMIN_PASSWORD='Sheng123..' \
+  -e SESSION_SECRET='change-this-session-secret-after-deploy' \
+  -e DATA_DIR=/app/data \
+  -v /www/wwwroot/2025-blog-local-docker/data:/app/data \
+  --restart unless-stopped \
+  duanxiaosheng/2025-blog-local-docker:latest
+```
+
+### 3. 访问地址
+
+```txt
+http://服务器IP:3000
+```
+
+### 4. 强烈建议改掉的环境变量
+
+至少改这两个：
+
+- `ADMIN_PASSWORD`
+- `SESSION_SECRET`
+
+例如你自己的命令应该长这样：
+
+```bash
+docker run -d \
+  --name 2025-blog-local-docker \
+  -p 3000:3000 \
+  -e NODE_ENV=production \
+  -e ADMIN_PASSWORD='你自己的后台密码' \
+  -e SESSION_SECRET='一串足够长的随机字符串' \
+  -e DATA_DIR=/app/data \
+  -v /www/wwwroot/2025-blog-local-docker/data:/app/data \
+  --restart unless-stopped \
+  duanxiaosheng/2025-blog-local-docker:latest
+```
+
+---
+
+## 二、方式 B：宝塔 Compose 拉镜像部署
+
+仓库里新增了发布版编排文件：
+
+```txt
+docker-compose.release.yml
+```
+
+它不是本地 build，而是直接拉 Docker Hub 镜像。
+
+### 用法
+
+```bash
+cd /www/wwwroot/2025-blog-local-docker
+cp .env.example .env
+mkdir -p data
+docker compose -f docker-compose.release.yml up -d
+```
+
+### `.env` 里建议至少改这些
+
+```env
+ADMIN_PASSWORD=你自己的后台密码
+SESSION_SECRET=你自己的随机字符串
+PORT=3000
+DATA_DIR=/app/data
+IMAGE_NAME=duanxiaosheng/2025-blog-local-docker:latest
+```
+
+### 宝塔面板里怎么用
+
+1. 打开宝塔面板
+2. 进入 **Docker**
+3. 进入 **Compose**
+4. 新建编排项目
+5. 选择 `docker-compose.release.yml`
+6. 配好 `.env` 后点击部署
+
+---
+
+## 三、方式 C：上传源码后本地 build
+
+适合你自己要改代码。
+
 项目目录建议：
 
 ```txt
 /www/wwwroot/2025-blog-public-adapt
 ```
 
-## 一、上传项目
+### 1. 上传项目
 
 把整个项目上传到服务器。
 
@@ -17,7 +123,7 @@
 - `.env.example`
 - `data/`（首次可以没有，程序会自动初始化）
 
-## 二、修改环境变量
+### 2. 修改环境变量
 
 你可以直接修改 `docker-compose.yml`，或者自己复制一份 `.env.example` 做记录。
 
@@ -26,22 +132,11 @@
 - `ADMIN_PASSWORD`
 - `SESSION_SECRET`
 
-例如：
-
-```yml
-environment:
-  NODE_ENV: production
-  PORT: 3000
-  ADMIN_PASSWORD: 你自己的后台密码
-  SESSION_SECRET: 一串足够长的随机字符串
-  DATA_DIR: /app/data
-```
-
-## 三、在宝塔 Docker / Compose 中创建项目
+### 3. 在宝塔 Docker / Compose 中创建项目
 
 推荐直接使用 `docker-compose.yml` 部署。
 
-### 方式 1：宝塔 Docker-Compose
+#### 方式 1：宝塔 Docker-Compose
 
 1. 打开宝塔面板
 2. 进入 **Docker**
@@ -50,12 +145,14 @@ environment:
 5. 选择这个项目目录里的 `docker-compose.yml`
 6. 点击部署
 
-### 方式 2：宝塔终端执行
+#### 方式 2：宝塔终端执行
 
 ```bash
 cd /www/wwwroot/2025-blog-public-adapt
 docker compose up -d --build
 ```
+
+---
 
 ## 四、端口访问
 
@@ -79,6 +176,8 @@ ports:
 http://服务器IP:8080
 ```
 
+---
+
 ## 五、反向代理（推荐）
 
 如果你有域名，比如：
@@ -99,6 +198,8 @@ http://127.0.0.1:3000
 http://127.0.0.1:8080
 ```
 
+---
+
 ## 六、数据备份
 
 你真正要备份的是：
@@ -116,17 +217,23 @@ http://127.0.0.1:8080
 备份命令示例：
 
 ```bash
-cd /www/wwwroot/2025-blog-public-adapt
+cd /www/wwwroot/2025-blog-local-docker
 tar -czf blog-data-backup.tar.gz data
 ```
+
+---
 
 ## 七、迁移到新服务器
 
 迁移时只要：
 
-1. 新服务器部署同一份项目代码
+1. 新服务器部署同一份项目代码，或者直接拉同一个 Docker Hub 镜像
 2. 把旧服务器 `data/` 目录复制过去
-3. 重新 `docker compose up -d --build`
+3. 启动容器
+
+如果你是 Docker Hub 部署，迁移根本不需要重新 build。
+
+---
 
 ## 八、后台使用说明
 
@@ -162,6 +269,8 @@ tar -czf blog-data-backup.tar.gz data
 - 点击页面中的管理员登录按钮
 - 输入 `ADMIN_PASSWORD`
 
+---
+
 ## 九、首次启动说明
 
 程序首次启动时会自动把原项目内置内容初始化到：
@@ -171,6 +280,8 @@ data/
 ```
 
 后续编辑都会保存到这个目录，不再依赖 GitHub。
+
+---
 
 ## 十、常见问题
 
