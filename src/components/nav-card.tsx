@@ -122,13 +122,9 @@ export default function NavCard() {
 	}, [form, styles, maxSM, maxXS])
 
 	useEffect(() => {
-		if (form === 'icons' && activeIndex !== undefined && hoveredIndex !== activeIndex) {
-			const timer = setTimeout(() => {
-				setHoveredIndex(activeIndex)
-			}, 1500)
-			return () => clearTimeout(timer)
-		}
-	}, [hoveredIndex, activeIndex, form])
+		if (form !== 'icons') return
+		setHoveredIndex(activeIndex ?? 0)
+	}, [activeIndex, form])
 
 	useEffect(() => {
 		if (form !== 'icons') {
@@ -180,7 +176,11 @@ export default function NavCard() {
 						<>
 							{form !== 'icons' && <div className='text-secondary mt-6 text-sm uppercase'>General</div>}
 
-							<div className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0 flex min-w-0 flex-1 items-center justify-between gap-2 space-y-0 overflow-visible sm:gap-4')}>
+							<div
+								className={cn('relative mt-2 space-y-2', form === 'icons' && 'mt-0 flex min-w-0 flex-1 items-center justify-between gap-2 space-y-0 overflow-visible sm:gap-4')}
+								onMouseLeave={() => {
+									if (form === 'icons') setHoveredIndex(activeIndex ?? 0)
+								}}>
 								<motion.div
 									className='pointer-events-none absolute max-w-[230px] rounded-full border'
 									layoutId='nav-hover'
