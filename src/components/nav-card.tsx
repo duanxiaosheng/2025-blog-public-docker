@@ -2,7 +2,7 @@
 
 import Card from '@/components/card'
 import Link from 'next/link'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { useCenterStore } from '@/hooks/use-center'
 import { CARD_SPACING } from '@/consts'
@@ -126,7 +126,7 @@ export default function NavCard() {
 		setHoveredIndex(activeIndex ?? 0)
 	}, [activeIndex, form])
 
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (form !== 'icons') {
 			setHoverRect(null)
 			return
@@ -142,6 +142,7 @@ export default function NavCard() {
 			height: activeItem.offsetHeight
 		})
 	}, [form, hoveredIndex, maxSM, maxXS, pathname])
+
 
 	if (maxSM) position = { x: center.x - size.width / 2, y: 16 }
 
@@ -181,27 +182,29 @@ export default function NavCard() {
 								onMouseLeave={() => {
 									if (form === 'icons') setHoveredIndex(activeIndex ?? 0)
 								}}>
-								<motion.div
-									className='pointer-events-none absolute max-w-[230px] rounded-full border'
-									layoutId='nav-hover'
-									initial={false}
-									animate={
-										form === 'icons'
-											? {
-													left: (hoverRect?.centerX ?? itemHeight / 2) - ((hoverRect?.width ?? itemHeight) + extraSize * 2) / 2,
-													top: (hoverRect?.top ?? 0) - extraSize,
-													width: (hoverRect?.width ?? itemHeight) + extraSize * 2,
-													height: (hoverRect?.height ?? itemHeight) + extraSize * 2
-											  }
-											: { top: hoveredIndex * (itemHeight + 8), left: 0, width: '100%', height: itemHeight }
-									}
-									transition={{
-										type: 'spring',
-										stiffness: 400,
-										damping: 30
-									}}
-									style={{ backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)' }}
-								/>
+								{(form !== 'icons' || hoverRect) && (
+									<motion.div
+										className='pointer-events-none absolute max-w-[230px] rounded-full border'
+										layoutId='nav-hover'
+										initial={false}
+										animate={
+											form === 'icons'
+												? {
+														left: (hoverRect?.centerX ?? itemHeight / 2) - ((hoverRect?.width ?? itemHeight) + extraSize * 2) / 2,
+														top: (hoverRect?.top ?? 0) - extraSize,
+														width: (hoverRect?.width ?? itemHeight) + extraSize * 2,
+														height: (hoverRect?.height ?? itemHeight) + extraSize * 2
+												  }
+												: { top: hoveredIndex * (itemHeight + 8), left: 0, width: '100%', height: itemHeight }
+										}
+										transition={{
+											type: 'spring',
+											stiffness: 400,
+											damping: 30
+										}}
+										style={{ backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)' }}
+									/>
+								)}
 
 								{list.map((item, index) => {
 									const isAppsItem = item.href === '/apps'
