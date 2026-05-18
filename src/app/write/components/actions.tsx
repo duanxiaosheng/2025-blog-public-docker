@@ -69,8 +69,8 @@ export function WriteActions() {
 		<>
 			<input ref={mdInputRef} type='file' accept='.md' className='hidden' onChange={handleMdFileChange} />
 
-			<div className='pointer-events-none fixed top-4 right-6 z-[9999] flex items-center gap-2'>
-				<div className='pointer-events-auto'>
+			<div className='fixed top-4 right-6 z-[9999] flex items-center gap-2 rounded-2xl bg-white/70 p-1 shadow-sm backdrop-blur-md'>
+				<div>
 					<AdminPasswordDialog />
 				</div>
 				{mode === 'edit' && (
@@ -85,9 +85,8 @@ export function WriteActions() {
 							animate={{ opacity: 1, scale: 1 }}
 							whileHover={{ scale: 1.05 }}
 							whileTap={{ scale: 0.95 }}
-							className='pointer-events-auto rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-100'
+							className='rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-100'
 							disabled={loading}
-							onPointerDown={e => e.stopPropagation()}
 							onClick={handleDelete}>
 							删除
 						</motion.button>
@@ -98,8 +97,7 @@ export function WriteActions() {
 							whileTap={{ scale: 0.95 }}
 							onClick={handleCancel}
 							disabled={loading}
-							onPointerDown={e => e.stopPropagation()}
-							className='bg-card pointer-events-auto rounded-xl border px-4 py-2 text-sm'>
+							className='bg-card rounded-xl border px-4 py-2 text-sm'>
 							取消
 						</motion.button>
 					</>
@@ -111,7 +109,7 @@ export function WriteActions() {
 					animate={{ opacity: 1, scale: 1 }}
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
-					className='bg-card pointer-events-auto rounded-xl border px-4 py-2 text-sm'
+					className='bg-card rounded-xl border px-4 py-2 text-sm'
 					disabled={loading}
 					onClick={handleImportMd}>
 					导入 MD
@@ -122,7 +120,7 @@ export function WriteActions() {
 					animate={{ opacity: 1, scale: 1 }}
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
-					className='bg-card pointer-events-auto rounded-xl border px-6 py-2 text-sm'
+					className='bg-card rounded-xl border px-6 py-2 text-sm'
 					disabled={loading}
 					onClick={openPreview}>
 					预览
@@ -133,7 +131,7 @@ export function WriteActions() {
 					animate={{ opacity: 1, scale: 1 }}
 					whileHover={{ scale: 1.05 }}
 					whileTap={{ scale: 0.95 }}
-					className='brand-btn pointer-events-auto px-6'
+					className='brand-btn px-6'
 					disabled={loading}
 					onClick={handleImportOrPublish}>
 					{buttonText}
