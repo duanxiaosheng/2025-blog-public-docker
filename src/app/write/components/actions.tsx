@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useWriteStore } from '../stores/write-store'
@@ -12,6 +12,7 @@ export function WriteActions() {
 	const { openPreview } = usePreviewStore()
 	const { isAuth, onPublish, onDelete } = usePublish()
 	const mdInputRef = useRef<HTMLInputElement>(null)
+	const [confirmingDelete, setConfirmingDelete] = useState(false)
 	const router = useRouter()
 
 	const handleImportOrPublish = () => {
@@ -23,9 +24,6 @@ export function WriteActions() {
 	}
 
 	const handleCancel = () => {
-		if (!window.confirm('放弃本次修改吗？')) {
-			return
-		}
 		const target = mode === 'edit' && originalSlug ? `/blog/${originalSlug}` : '/'
 		router.push(target)
 		window.setTimeout(() => {
@@ -40,10 +38,7 @@ export function WriteActions() {
 			toast.info('请先登录管理员密码')
 			return
 		}
-		const confirmMsg = form?.title ? `确定删除《${form.title}》吗？该操作不可恢复。` : '确定删除当前文章吗？该操作不可恢复。'
-		if (window.confirm(confirmMsg)) {
-			onDelete()
-		}
+		setConfirmingDelete(true)
 	}
 
 	const handleImportMd = () => {
@@ -79,27 +74,35 @@ export function WriteActions() {
 							<div className='rounded-lg border bg-blue-50 px-4 py-2 text-sm text-blue-700'>编辑模式</div>
 						</motion.div>
 
-						<motion.button
+						<button
 							type='button'
-							initial={{ opacity: 0, scale: 0.6 }}
-							animate={{ opacity: 1, scale: 1 }}
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
-							className='rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-100'
+							className='rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-100 disabled:opacity-60'
 							disabled={loading}
+							onPointerDown={e => e.stopPropagation()}
 							onClick={handleDelete}>
 							删除
-						</motion.button>
+						</button>
 
-						<motion.button
+						<button
 							type='button'
-							whileHover={{ scale: 1.05 }}
-							whileTap={{ scale: 0.95 }}
 							onClick={handleCancel}
 							disabled={loading}
-							className='bg-card rounded-xl border px-4 py-2 text-sm'>
+							onPointerDown={e => e.stopPropagation()}
+							className='bg-card rounded-xl border px-4 py-2 text-sm disabled:opacity-60'>
 							取消
-						</motion.button>
+						</button>
+
+						{confirmingDelete && (
+							<div className='flex items-center gap-2 rounded-xl border border-red-200 bg-white/95 px-3 py-2 text-sm shadow-sm backdrop-blur'>
+								<span className='text-red-600'>{form?.title ? `确认删除《${form.title}》？` : '确认删除？'}</span>
+								<button type='button' className='rounded-lg bg-red-500 px-3 py-1 text-white' disabled={loading} onClick={onDelete}>
+									确认
+								</button>
+								<button type='button' className='rounded-lg border px-3 py-1' disabled={loading} onClick={() => setConfirmingDelete(false)}>
+									取消
+								</button>
+							</div>
+						)}
 					</>
 				)}
 
