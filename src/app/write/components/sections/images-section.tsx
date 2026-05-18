@@ -115,7 +115,7 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 											backdropFilter: 'blur(3px)',
 											WebkitBackdropFilter: 'blur(3px)'
 										}}>
-										<span className='whitespace-nowrap text-[10px] font-medium text-blue-500'>封面</span>
+										<span className='whitespace-nowrap text-[10px] font-bold text-red-500'>封面</span>
 									</div>
 								)}
 								<div className='absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100'>
@@ -129,9 +129,9 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 							</div>
 							<button
 								type='button'
-								className='w-full rounded-xl border border-neutral-200/80 bg-white/88 px-3 py-1 text-[6px] font-medium text-red-500 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white active:translate-y-0'
+								className='w-full rounded-xl border border-neutral-200/80 bg-white/88 px-3 py-1 text-[8px] font-medium text-red-500 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white active:translate-y-0'
 								onClick={() => insertImageMarkdown(markdown)}>
-								填入
+								填 入
 							</button>
 						</div>
 					)
