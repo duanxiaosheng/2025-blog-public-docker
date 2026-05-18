@@ -129,7 +129,7 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 							</div>
 							<button
 								type='button'
-								className='w-full rounded-xl border border-neutral-200/80 bg-white/88 px-3 py-1 text-[8px] font-medium text-red-500 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white active:translate-y-0'
+								className='w-full rounded-xl border border-neutral-200/80 bg-white/88 px-3 py-1 text-[8px] font-bold text-red-500 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white active:translate-y-0'
 								onClick={() => insertImageMarkdown(markdown)}>
 								填 入
 							</button>
