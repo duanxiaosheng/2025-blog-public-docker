@@ -90,7 +90,7 @@ export default function NavCard() {
 
 	const activeIndex = useMemo(() => {
 		const index = list.findIndex(item => pathname === item.href)
-		return index >= 0 ? index : 0
+		return index >= 0 ? index : null
 	}, [pathname])
 
 	useEffect(() => {
@@ -107,14 +107,14 @@ export default function NavCard() {
 	const displayIndex = hoverIndex ?? activeIndex
 	const iconGap = maxSM ? ICON_GAP_MOBILE : ICON_GAP_DESKTOP
 	const iconTrackWidth = list.length * ICON_SLOT_SIZE + (list.length - 1) * iconGap
-	const iconHighlightLeft = displayIndex * (ICON_SLOT_SIZE + iconGap)
+	const iconHighlightLeft = (displayIndex ?? 0) * (ICON_SLOT_SIZE + iconGap)
 	const iconHighlightStyle = {
 		left: iconHighlightLeft,
 		top: 0,
 		width: ICON_SLOT_SIZE,
 		height: ICON_SLOT_SIZE
 	}
-	const fullHighlightStyle = {
+	const fullHighlightStyle = displayIndex === null ? null : {
 		left: 0,
 		top: displayIndex * (FULL_HIGHLIGHT_HEIGHT + FULL_HIGHLIGHT_GAP),
 		width: '100%',
@@ -147,7 +147,7 @@ export default function NavCard() {
 	const shouldAnimateIcons = useMemo(() => {
 		const previousForm = previousFormRef.current
 		const previousDisplayIndex = previousDisplayIndexRef.current
-		const animate = previousForm === 'icons' && previousDisplayIndex !== null && previousDisplayIndex !== displayIndex
+		const animate = previousForm === 'icons' && previousDisplayIndex !== null && displayIndex !== null && previousDisplayIndex !== displayIndex
 		return animate
 	}, [displayIndex])
 
@@ -193,13 +193,15 @@ export default function NavCard() {
 								onMouseLeave={() => setHoverIndex(null)}>
 								{form === 'icons' ? (
 									<div className='relative' style={{ width: iconTrackWidth, height: ICON_SLOT_SIZE }}>
-										<motion.div
-											className='pointer-events-none absolute rounded-full border'
-											initial={false}
-											animate={iconHighlightStyle}
-											transition={shouldAnimateIcons ? { type: 'spring', stiffness: 380, damping: 32 } : { duration: 0 }}
-											style={{ backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)' }}
-										/>
+										{displayIndex !== null && (
+											<motion.div
+												className='pointer-events-none absolute rounded-full border'
+												initial={false}
+												animate={iconHighlightStyle}
+												transition={shouldAnimateIcons ? { type: 'spring', stiffness: 380, damping: 32 } : { duration: 0 }}
+												style={{ backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)' }}
+											/>
+										)}
 
 										<div className='absolute inset-0 flex items-center' style={{ gap: iconGap }}>
 											{list.map((item, index) => {
@@ -223,13 +225,15 @@ export default function NavCard() {
 									</div>
 								) : (
 									<>
-										<div
-											className='pointer-events-none absolute rounded-full border transition-all duration-200 ease-out'
-											style={{
-												...fullHighlightStyle,
-												backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)'
-											}}
-										/>
+										{fullHighlightStyle && (
+											<div
+												className='pointer-events-none absolute rounded-full border transition-all duration-200 ease-out'
+												style={{
+													...fullHighlightStyle,
+													backgroundImage: 'linear-gradient(to right bottom, var(--color-border) 60%, var(--color-card) 100%)'
+												}}
+											/>
+										)}
 
 										{list.map((item, index) => {
 											const isAppsItem = item.href === '/apps'
