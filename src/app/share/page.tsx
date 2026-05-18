@@ -14,8 +14,9 @@ import type { LogoItem } from './components/logo-upload-dialog'
 import { AdminPasswordDialog } from '@/components/admin-password-dialog'
 
 export default function Page() {
-	const [shares, setShares] = useState<Share[]>(initialList as Share[])
-	const [originalShares, setOriginalShares] = useState<Share[]>(initialList as Share[])
+	const [shares, setShares] = useState<Share[]>([])
+	const [originalShares, setOriginalShares] = useState<Share[]>([])
+	const [isLoading, setIsLoading] = useState(true)
 	const [isEditMode, setIsEditMode] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [editingShare, setEditingShare] = useState<Share | null>(null)
@@ -28,12 +29,18 @@ export default function Page() {
 
 	useEffect(() => {
 		fetch('/api/content/share', { cache: 'no-store' })
-			.then(res => (res.ok ? res.json() : initialList))
+			.then(res => (res.ok ? res.json() : Promise.reject(new Error('fetch shares failed'))))
 			.then((data: Share[]) => {
 				setShares(data)
 				setOriginalShares(data)
 			})
-			.catch(() => {})
+			.catch(() => {
+				setShares(initialList as Share[])
+				setOriginalShares(initialList as Share[])
+			})
+			.finally(() => {
+				setIsLoading(false)
+			})
 	}, [])
 
 	const handleUpdate = (updatedShare: Share, oldShare: Share, logoItem?: LogoItem) => {
@@ -119,7 +126,11 @@ export default function Page() {
 
 	return (
 		<>
-			<GridView shares={shares} isEditMode={isEditMode} onUpdate={handleUpdate} onDelete={handleDelete} />
+			{isLoading ? (
+				<div className='text-secondary flex justify-center px-6 pt-32 pb-12 text-sm'>加载中...</div>
+			) : (
+				<GridView shares={shares} isEditMode={isEditMode} onUpdate={handleUpdate} onDelete={handleDelete} />
+			)}
 
 			<motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className='absolute top-4 right-6 flex gap-3 max-sm:hidden'>
 				<AdminPasswordDialog />

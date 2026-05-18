@@ -13,8 +13,9 @@ import type { AvatarItem } from './components/avatar-upload-dialog'
 import { AdminPasswordDialog } from '@/components/admin-password-dialog'
 
 export default function Page() {
-	const [bloggers, setBloggers] = useState<Blogger[]>(initialList as Blogger[])
-	const [originalBloggers, setOriginalBloggers] = useState<Blogger[]>(initialList as Blogger[])
+	const [bloggers, setBloggers] = useState<Blogger[]>([])
+	const [originalBloggers, setOriginalBloggers] = useState<Blogger[]>([])
+	const [isLoading, setIsLoading] = useState(true)
 	const [isEditMode, setIsEditMode] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [editingBlogger, setEditingBlogger] = useState<Blogger | null>(null)
@@ -27,12 +28,18 @@ export default function Page() {
 
 	useEffect(() => {
 		fetch('/api/content/bloggers', { cache: 'no-store' })
-			.then(res => (res.ok ? res.json() : initialList))
+			.then(res => (res.ok ? res.json() : Promise.reject(new Error('fetch bloggers failed'))))
 			.then((data: Blogger[]) => {
 				setBloggers(data)
 				setOriginalBloggers(data)
 			})
-			.catch(() => {})
+			.catch(() => {
+				setBloggers(initialList as Blogger[])
+				setOriginalBloggers(initialList as Blogger[])
+			})
+			.finally(() => {
+				setIsLoading(false)
+			})
 	}, [])
 
 	const handleUpdate = (updatedBlogger: Blogger, oldBlogger: Blogger, avatarItem?: AvatarItem) => {
@@ -118,7 +125,11 @@ export default function Page() {
 
 	return (
 		<>
-			<GridView bloggers={bloggers} isEditMode={isEditMode} onUpdate={handleUpdate} onDelete={handleDelete} />
+			{isLoading ? (
+				<div className='text-secondary flex justify-center px-6 pt-32 pb-12 text-sm'>加载中...</div>
+			) : (
+				<GridView bloggers={bloggers} isEditMode={isEditMode} onUpdate={handleUpdate} onDelete={handleDelete} />
+			)}
 
 			<motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className='absolute top-4 right-6 flex gap-3 max-sm:hidden'>
 				<AdminPasswordDialog />

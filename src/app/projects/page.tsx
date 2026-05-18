@@ -13,8 +13,9 @@ import type { ImageItem } from './components/image-upload-dialog'
 import { AdminPasswordDialog } from '@/components/admin-password-dialog'
 
 export default function Page() {
-	const [projects, setProjects] = useState<Project[]>(initialList as Project[])
-	const [originalProjects, setOriginalProjects] = useState<Project[]>(initialList as Project[])
+	const [projects, setProjects] = useState<Project[]>([])
+	const [originalProjects, setOriginalProjects] = useState<Project[]>([])
+	const [isLoading, setIsLoading] = useState(true)
 	const [isEditMode, setIsEditMode] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [editingProject, setEditingProject] = useState<Project | null>(null)
@@ -27,12 +28,18 @@ export default function Page() {
 
 	useEffect(() => {
 		fetch('/api/content/projects', { cache: 'no-store' })
-			.then(res => (res.ok ? res.json() : initialList))
+			.then(res => (res.ok ? res.json() : Promise.reject(new Error('fetch projects failed'))))
 			.then((data: Project[]) => {
 				setProjects(data)
 				setOriginalProjects(data)
 			})
-			.catch(() => {})
+			.catch(() => {
+				setProjects(initialList as Project[])
+				setOriginalProjects(initialList as Project[])
+			})
+			.finally(() => {
+				setIsLoading(false)
+			})
 	}, [])
 
 	const handleUpdate = (updatedProject: Project, oldProject: Project, imageItem?: ImageItem) => {
@@ -119,11 +126,15 @@ export default function Page() {
 	return (
 		<>
 			<div className='flex flex-col items-center justify-center px-6 pt-32 pb-12'>
-				<div className='grid w-full max-w-[1200px] grid-cols-2 gap-6 max-md:grid-cols-1'>
-					{projects.map(project => (
-						<ProjectCard key={project.url} project={project} isEditMode={isEditMode} onUpdate={handleUpdate} onDelete={() => handleDelete(project)} />
-					))}
-				</div>
+				{isLoading ? (
+					<div className='text-secondary py-16 text-sm'>加载中...</div>
+				) : (
+					<div className='grid w-full max-w-[1200px] grid-cols-2 gap-6 max-md:grid-cols-1'>
+						{projects.map(project => (
+							<ProjectCard key={project.url} project={project} isEditMode={isEditMode} onUpdate={handleUpdate} onDelete={() => handleDelete(project)} />
+						))}
+					</div>
+				)}
 			</div>
 
 			<motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className='absolute top-4 right-6 flex gap-3 max-sm:hidden'>
