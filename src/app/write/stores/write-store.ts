@@ -29,6 +29,11 @@ type WriteStore = {
 	originalSlug: string | null
 	setMode: (mode: 'create' | 'edit', originalSlug?: string) => void
 
+	// Editor state
+	editorElement: HTMLTextAreaElement | null
+	setEditorElement: (element: HTMLTextAreaElement | null) => void
+	insertAtCursor: (text: string) => void
+
 	// Form state
 	form: PublishForm
 	updateForm: (updates: Partial<PublishForm>) => void
@@ -72,6 +77,31 @@ export const useWriteStore = create<WriteStore>((set, get) => ({
 	mode: 'create',
 	originalSlug: null,
 	setMode: (mode, originalSlug) => set({ mode, originalSlug: originalSlug || null }),
+
+	// Editor state
+	editorElement: null,
+	setEditorElement: element => set({ editorElement: element }),
+	insertAtCursor: text => {
+		const textarea = get().editorElement
+		if (!textarea) {
+			const currentMd = get().form.md
+			set(state => ({ form: { ...state.form, md: `${currentMd}${currentMd ? '\n' : ''}${text}` } }))
+			return
+		}
+
+		textarea.focus()
+		const success = document.execCommand('insertText', false, text)
+		if (!success) {
+			const { selectionStart, selectionEnd, value } = textarea
+			const before = value.substring(0, selectionStart)
+			const after = value.substring(selectionEnd)
+			set(state => ({ form: { ...state.form, md: before + text + after } }))
+			setTimeout(() => {
+				textarea.setSelectionRange(selectionStart + text.length, selectionStart + text.length)
+				textarea.focus()
+			}, 0)
+		}
+	},
 
 	// Form state
 	form: { ...initialForm },

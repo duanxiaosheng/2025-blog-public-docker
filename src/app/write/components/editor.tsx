@@ -6,28 +6,11 @@ import { useRef } from 'react'
 const defaultText = 'text'
 
 export function WriteEditor() {
-	const { form, updateForm, images, addFiles } = useWriteStore()
+	const { form, updateForm, addFiles, setEditorElement, insertAtCursor } = useWriteStore()
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 
 	const insertText = (text: string) => {
-		const textarea = textareaRef.current
-		if (!textarea) return
-
-		textarea.focus()
-		// Use execCommand to preserve undo/redo stack
-		const success = document.execCommand('insertText', false, text)
-
-		if (!success) {
-			// Fallback for browsers that don't support execCommand
-			const { selectionStart, selectionEnd, value } = textarea
-			const before = value.substring(0, selectionStart)
-			const after = value.substring(selectionEnd)
-			updateForm({ md: before + text + after })
-			setTimeout(() => {
-				textarea.setSelectionRange(selectionStart + text.length, selectionStart + text.length)
-				textarea.focus()
-			}, 0)
-		}
+		insertAtCursor(text)
 	}
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -178,7 +161,10 @@ export function WriteEditor() {
 				/>
 			</div>
 			<textarea
-				ref={textareaRef}
+				ref={node => {
+					textareaRef.current = node
+					setEditorElement(node)
+				}}
 				placeholder='Markdown 内容'
 				className='bg-card h-[650px] w-full flex-1 resize-none rounded-xl border p-4 text-sm'
 				value={form.md}

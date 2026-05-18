@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { useWriteStore } from '../../stores/write-store'
 import Link from 'next/link'
@@ -19,11 +19,14 @@ type ImagesSectionProps = {
 }
 
 export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
-	const { images, cover, addUrlImage, addFiles, deleteImage } = useWriteStore()
+	const { images, cover, addUrlImage, addFiles, deleteImage, insertAtCursor } = useWriteStore()
 	const [urlInput, setUrlInput] = useState<string>('')
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
 	const coverId = cover?.id ?? null
+	const insertImageMarkdown = (markdown: string) => {
+		insertAtCursor(`${markdown}\n`)
+	}
 
 	return (
 		<motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay }} className='card relative'>
@@ -69,7 +72,7 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 				}}
 			/>
 
-			<div className='mt-3 grid grid-cols-4 gap-2'>
+			<div className='mt-3 grid grid-cols-4 gap-2 sm:grid-cols-4'>
 				{/* plus tile */}
 				<div
 					className='group bg-card hover:bg-secondary/20 relative grid aspect-square cursor-pointer place-items-center rounded-lg border'
@@ -94,7 +97,7 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 					return (
 						<div
 							key={item.id}
-							className={`group relative aspect-square overflow-hidden rounded-lg border bg-white/50 text-xs ${isCover ? 'ring-2 ring-blue-500' : ''}`}>
+							className={`group relative aspect-square overflow-hidden rounded-xl border bg-white/50 text-xs shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${isCover ? 'ring-2 ring-blue-500' : ''}`}>
 							<img
 								src={src}
 								className='h-full w-full object-cover'
@@ -104,10 +107,25 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 									e.dataTransfer.setData('text/markdown', markdown)
 								}}
 							/>
-							{isCover && <div className='absolute top-1 left-1 rounded-md bg-blue-500 px-1.5 py-0.5 text-white shadow'>封面</div>}
-							<div className='absolute top-1 right-1 hidden group-hover:flex'>
-								<button type='button' className='rounded-md bg-white/80 px-1.5 py-0.5 shadow hover:bg-white' onClick={() => deleteImage(item.id)}>
+							<div className='pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/45 to-transparent opacity-80 transition group-hover:opacity-100' />
+							{isCover && <div className='absolute top-2 left-2 rounded-full bg-blue-500 px-2 py-1 text-[10px] text-white shadow'>封面</div>}
+							<div className='absolute top-2 right-2 hidden gap-1 group-hover:flex'>
+								<button
+									type='button'
+									className='rounded-full bg-white/88 px-2 py-1 text-[10px] shadow-sm backdrop-blur transition hover:bg-white'
+									onClick={() => deleteImage(item.id)}>
 									删除
+								</button>
+							</div>
+							<div className='absolute inset-x-2 bottom-2 flex items-center justify-between gap-2'>
+								<div className='min-w-0 rounded-full bg-black/45 px-2 py-1 text-[10px] text-white/90 backdrop-blur'>
+									<span className='block truncate'>{isUrl ? '外链图片' : item.filename}</span>
+								</div>
+								<button
+									type='button'
+									className='rounded-full border border-white/60 bg-white/88 px-3 py-1 text-[10px] font-medium text-neutral-700 shadow-sm backdrop-blur transition hover:scale-[1.02] hover:bg-white active:scale-[0.98]'
+									onClick={() => insertImageMarkdown(markdown)}>
+									插入
 								</button>
 							</div>
 						</div>
