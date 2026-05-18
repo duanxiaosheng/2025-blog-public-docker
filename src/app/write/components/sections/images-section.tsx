@@ -72,10 +72,10 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 				}}
 			/>
 
-			<div className='mt-3 grid grid-cols-4 gap-2 sm:grid-cols-4'>
+			<div className='mt-3 grid grid-cols-4 gap-3 sm:grid-cols-4'>
 				{/* plus tile */}
 				<div
-					className='group bg-card hover:bg-secondary/20 relative grid aspect-square cursor-pointer place-items-center rounded-lg border'
+					className='group bg-card hover:bg-secondary/20 relative grid aspect-square cursor-pointer place-items-center rounded-xl border'
 					onClick={() => fileInputRef.current?.click()}
 					onDragOver={e => {
 						e.preventDefault()
@@ -95,39 +95,40 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 					const isCover = coverId === item.id
 
 					return (
-						<div
-							key={item.id}
-							className={`group relative aspect-square overflow-hidden rounded-xl border bg-white/50 text-xs shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${isCover ? 'ring-2 ring-blue-500' : ''}`}>
-							<img
-								src={src}
-								className='h-full w-full object-cover'
-								draggable
-								onDragStart={e => {
-									e.dataTransfer.setData('text/plain', markdown)
-									e.dataTransfer.setData('text/markdown', markdown)
-								}}
-							/>
-							<div className='pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/45 to-transparent opacity-80 transition group-hover:opacity-100' />
-							{isCover && <div className='absolute top-2 left-2 rounded-full bg-blue-500 px-2 py-1 text-[10px] text-white shadow'>封面</div>}
-							<div className='absolute top-2 right-2 hidden gap-1 group-hover:flex'>
-								<button
-									type='button'
-									className='rounded-full bg-white/88 px-2 py-1 text-[10px] shadow-sm backdrop-blur transition hover:bg-white'
-									onClick={() => deleteImage(item.id)}>
-									删除
-								</button>
-							</div>
-							<div className='absolute inset-x-2 bottom-2 flex items-center justify-between gap-2'>
-								<div className='min-w-0 rounded-full bg-black/45 px-2 py-1 text-[10px] text-white/90 backdrop-blur'>
-									<span className='block truncate'>{isUrl ? '外链图片' : item.filename}</span>
+						<div key={item.id} className='space-y-2'>
+							<div
+								className={`group relative aspect-square overflow-hidden rounded-xl border bg-white/50 text-xs shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${isCover ? 'ring-2 ring-blue-500' : ''}`}>
+								<img
+									src={src}
+									className='h-full w-full object-cover'
+									draggable
+									onDragStart={e => {
+										e.dataTransfer.setData('text/plain', markdown)
+										e.dataTransfer.setData('text/markdown', markdown)
+									}}
+								/>
+								<div className='pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/45 to-transparent opacity-80 transition group-hover:opacity-100' />
+								{isCover && <div className='absolute top-2 left-2 rounded-full bg-blue-500 px-2 py-1 text-[10px] text-white shadow'>封面</div>}
+								<div className='absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100'>
+									<button
+										type='button'
+										className='rounded-full bg-white/88 px-2 py-1 text-[10px] shadow-sm backdrop-blur transition hover:bg-white'
+										onClick={() => deleteImage(item.id)}>
+										删除
+									</button>
 								</div>
-								<button
-									type='button'
-									className='rounded-full border border-white/60 bg-white/88 px-3 py-1 text-[10px] font-medium text-neutral-700 shadow-sm backdrop-blur transition hover:scale-[1.02] hover:bg-white active:scale-[0.98]'
-									onClick={() => insertImageMarkdown(markdown)}>
-									插入
-								</button>
+								<div className='absolute inset-x-2 bottom-2'>
+									<div className='min-w-0 rounded-full bg-black/45 px-2 py-1 text-[10px] text-white/90 backdrop-blur'>
+										<span className='block truncate'>{isUrl ? '外链图片' : item.filename}</span>
+									</div>
+								</div>
 							</div>
+							<button
+								type='button'
+								className='w-full rounded-xl border border-neutral-200/80 bg-white/88 px-3 py-2 text-[11px] font-medium text-neutral-700 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white active:translate-y-0'
+								onClick={() => insertImageMarkdown(markdown)}>
+								插入到文章
+							</button>
 						</div>
 					)
 				})}
