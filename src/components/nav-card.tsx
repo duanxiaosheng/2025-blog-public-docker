@@ -65,7 +65,7 @@ const list = [
 	}
 ]
 
-const FULL_HIGHLIGHT_HEIGHT = 28
+const FULL_HIGHLIGHT_HEIGHT = 52
 const FULL_HIGHLIGHT_GAP = 8
 const ICON_SLOT_SIZE = 44
 const ICON_GAP_DESKTOP = 18
