@@ -74,14 +74,28 @@ export function WriteActions() {
 							<div className='rounded-lg border bg-blue-50 px-4 py-2 text-sm text-blue-700'>编辑模式</div>
 						</motion.div>
 
-						<button
-							type='button'
-							className='rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-100 disabled:opacity-60'
-							disabled={loading}
-							onPointerDown={e => e.stopPropagation()}
-							onClick={handleDelete}>
-							删除
-						</button>
+						<div className='relative'>
+							<button
+								type='button'
+								className='rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-100 disabled:opacity-60'
+								disabled={loading}
+								onPointerDown={e => e.stopPropagation()}
+								onClick={handleDelete}>
+								删除
+							</button>
+
+							{confirmingDelete && (
+								<div className='absolute right-0 bottom-full mb-2 flex min-w-max items-center gap-2 rounded-xl border border-red-200 bg-white/95 px-3 py-2 text-sm shadow-sm backdrop-blur'>
+									<span className='text-red-600'>{form?.title ? `确认删除《${form.title}》？` : '确认删除？'}</span>
+									<button type='button' className='rounded-lg bg-red-500 px-3 py-1 text-white' disabled={loading} onClick={onDelete}>
+										确认
+									</button>
+									<button type='button' className='rounded-lg border px-3 py-1' disabled={loading} onClick={() => setConfirmingDelete(false)}>
+										取消
+									</button>
+								</div>
+							)}
+						</div>
 
 						<button
 							type='button'
@@ -91,18 +105,6 @@ export function WriteActions() {
 							className='bg-card rounded-xl border px-4 py-2 text-sm disabled:opacity-60'>
 							取消
 						</button>
-
-						{confirmingDelete && (
-							<div className='flex items-center gap-2 rounded-xl border border-red-200 bg-white/95 px-3 py-2 text-sm shadow-sm backdrop-blur'>
-								<span className='text-red-600'>{form?.title ? `确认删除《${form.title}》？` : '确认删除？'}</span>
-								<button type='button' className='rounded-lg bg-red-500 px-3 py-1 text-white' disabled={loading} onClick={onDelete}>
-									确认
-								</button>
-								<button type='button' className='rounded-lg border px-3 py-1' disabled={loading} onClick={() => setConfirmingDelete(false)}>
-									取消
-								</button>
-							</div>
-						)}
 					</>
 				)}
 
