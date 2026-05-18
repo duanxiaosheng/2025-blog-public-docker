@@ -30,7 +30,7 @@ const list = [
 	{
 		icon: ScrollOutlineSVG,
 		iconActive: ScrollFilledSVG,
-		label: '近期文章',
+		label: '我的文章',
 		href: '/blog'
 	},
 	{
@@ -46,10 +46,10 @@ const list = [
 		href: '/projects'
 	},
 	{
-		icon: AboutOutlineSVG,
-		iconActive: AboutFilledSVG,
-		label: '关于网站',
-		href: '/about'
+		icon: WebsiteOutlineSVG,
+		iconActive: WebsiteFilledSVG,
+		label: '优秀博客',
+		href: '/bloggers'
 	},
 	{
 		icon: ShareOutlineSVG,
@@ -58,10 +58,10 @@ const list = [
 		href: '/share'
 	},
 	{
-		icon: WebsiteOutlineSVG,
-		iconActive: WebsiteFilledSVG,
-		label: '优秀博客',
-		href: '/bloggers'
+		icon: AboutOutlineSVG,
+		iconActive: AboutFilledSVG,
+		label: '关于网站',
+		href: '/about'
 	}
 ]
 
