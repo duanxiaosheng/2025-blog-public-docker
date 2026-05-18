@@ -110,7 +110,11 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 								{isCover && (
 									<div
 										className='pointer-events-none absolute inset-0 grid place-items-center'
-										style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+										style={{
+											background: 'rgba(255, 255, 255, 0.3)',
+											backdropFilter: 'blur(3px)',
+											WebkitBackdropFilter: 'blur(3px)'
+										}}>
 										<span className='whitespace-nowrap text-[10px] font-medium text-blue-500'>封面</span>
 									</div>
 								)}

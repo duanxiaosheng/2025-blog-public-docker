@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useWriteStore } from '../stores/write-store'
@@ -8,10 +8,9 @@ import { usePublish } from '../hooks/use-publish'
 import { AdminPasswordDialog } from '@/components/admin-password-dialog'
 
 export function WriteActions() {
-	const { loading, mode, form, loadBlogForEdit, originalSlug, updateForm } = useWriteStore()
+	const { loading, mode, form, originalSlug, updateForm } = useWriteStore()
 	const { openPreview } = usePreviewStore()
 	const { isAuth, onPublish, onDelete } = usePublish()
-	const [saving, setSaving] = useState(false)
 	const mdInputRef = useRef<HTMLInputElement>(null)
 	const router = useRouter()
 
@@ -27,11 +26,11 @@ export function WriteActions() {
 		if (!window.confirm('放弃本次修改吗？')) {
 			return
 		}
-		if (mode === 'edit' && originalSlug) {
-			router.push(`/blog/${originalSlug}`)
-		} else {
-			router.push('/')
-		}
+		const target = mode === 'edit' && originalSlug ? `/blog/${originalSlug}` : '/'
+		router.push(target)
+		window.setTimeout(() => {
+			if (window.location.pathname !== target) window.location.href = target
+		}, 120)
 	}
 
 	const buttonText = isAuth ? (mode === 'edit' ? '更新' : '发布') : '请先登录'
@@ -70,7 +69,7 @@ export function WriteActions() {
 		<>
 			<input ref={mdInputRef} type='file' accept='.md' className='hidden' onChange={handleMdFileChange} />
 
-			<ul className='absolute top-4 right-6 flex items-center gap-2'>
+			<ul className='fixed top-4 right-6 z-50 flex items-center gap-2'>
 				<li>
 					<AdminPasswordDialog />
 				</li>
@@ -81,6 +80,7 @@ export function WriteActions() {
 						</motion.div>
 
 						<motion.button
+							type='button'
 							initial={{ opacity: 0, scale: 0.6 }}
 							animate={{ opacity: 1, scale: 1 }}
 							whileHover={{ scale: 1.05 }}
@@ -92,10 +92,11 @@ export function WriteActions() {
 						</motion.button>
 
 						<motion.button
+							type='button'
 							whileHover={{ scale: 1.05 }}
 							whileTap={{ scale: 0.95 }}
 							onClick={handleCancel}
-							disabled={saving}
+							disabled={loading}
 							className='bg-card rounded-xl border px-4 py-2 text-sm'>
 							取消
 						</motion.button>
@@ -103,6 +104,7 @@ export function WriteActions() {
 				)}
 
 				<motion.button
+					type='button'
 					initial={{ opacity: 0, scale: 0.6 }}
 					animate={{ opacity: 1, scale: 1 }}
 					whileHover={{ scale: 1.05 }}
@@ -113,6 +115,7 @@ export function WriteActions() {
 					导入 MD
 				</motion.button>
 				<motion.button
+					type='button'
 					initial={{ opacity: 0, scale: 0.6 }}
 					animate={{ opacity: 1, scale: 1 }}
 					whileHover={{ scale: 1.05 }}
@@ -123,6 +126,7 @@ export function WriteActions() {
 					预览
 				</motion.button>
 				<motion.button
+					type='button'
 					initial={{ opacity: 0, scale: 0.6 }}
 					animate={{ opacity: 1, scale: 1 }}
 					whileHover={{ scale: 1.05 }}
