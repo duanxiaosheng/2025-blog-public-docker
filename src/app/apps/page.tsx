@@ -14,8 +14,9 @@ import type { IconItem } from './components/icon-upload-dialog'
 import { AdminPasswordDialog } from '@/components/admin-password-dialog'
 
 export default function Page() {
-	const [apps, setApps] = useState<AppLink[]>(initialList as AppLink[])
-	const [originalApps, setOriginalApps] = useState<AppLink[]>(initialList as AppLink[])
+	const [apps, setApps] = useState<AppLink[]>([])
+	const [originalApps, setOriginalApps] = useState<AppLink[]>([])
+	const [isLoading, setIsLoading] = useState(true)
 	const [isEditMode, setIsEditMode] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [editingApp, setEditingApp] = useState<AppLink | null>(null)
@@ -28,12 +29,18 @@ export default function Page() {
 
 	useEffect(() => {
 		fetch('/api/content/apps', { cache: 'no-store' })
-			.then(res => (res.ok ? res.json() : initialList))
+			.then(res => (res.ok ? res.json() : Promise.reject(new Error('fetch apps failed'))))
 			.then((data: AppLink[]) => {
 				setApps(data)
 				setOriginalApps(data)
 			})
-			.catch(() => {})
+			.catch(() => {
+				setApps(initialList as AppLink[])
+				setOriginalApps(initialList as AppLink[])
+			})
+			.finally(() => {
+				setIsLoading(false)
+			})
 	}, [])
 
 	const rememberIconItem = (app: AppLink, iconItem?: IconItem) => {
@@ -122,7 +129,11 @@ export default function Page() {
 
 	return (
 		<>
-			<GridView apps={apps} isEditMode={isEditMode} onUpdate={handleUpdate} onDelete={handleDelete} />
+			{isLoading ? (
+				<div className='text-secondary flex justify-center px-6 pt-32 pb-12 text-sm'>加载中...</div>
+			) : (
+				<GridView apps={apps} isEditMode={isEditMode} onUpdate={handleUpdate} onDelete={handleDelete} />
+			)}
 
 			<motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className='absolute top-4 right-6 flex gap-3 max-sm:hidden'>
 				<AdminPasswordDialog />

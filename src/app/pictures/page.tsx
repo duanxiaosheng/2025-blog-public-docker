@@ -22,8 +22,9 @@ export interface Picture {
 }
 
 export default function Page() {
-	const [pictures, setPictures] = useState<Picture[]>(initialList as Picture[])
-	const [originalPictures, setOriginalPictures] = useState<Picture[]>(initialList as Picture[])
+	const [pictures, setPictures] = useState<Picture[]>([])
+	const [originalPictures, setOriginalPictures] = useState<Picture[]>([])
+	const [isLoading, setIsLoading] = useState(true)
 	const [isEditMode, setIsEditMode] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
@@ -36,12 +37,18 @@ export default function Page() {
 
 	useEffect(() => {
 		fetch('/api/content/pictures', { cache: 'no-store' })
-			.then(res => (res.ok ? res.json() : initialList))
+			.then(res => (res.ok ? res.json() : Promise.reject(new Error('fetch pictures failed'))))
 			.then((data: Picture[]) => {
 				setPictures(data)
 				setOriginalPictures(data)
 			})
-			.catch(() => {})
+			.catch(() => {
+				setPictures(initialList as Picture[])
+				setOriginalPictures(initialList as Picture[])
+			})
+			.finally(() => {
+				setIsLoading(false)
+			})
 	}, [])
 
 	const handleUploadSubmit = ({ images, description }: { images: ImageItem[]; description: string }) => {
@@ -157,8 +164,14 @@ export default function Page() {
 
 	return (
 		<>
-			<RandomLayout pictures={pictures} isEditMode={isEditMode} onDeleteSingle={handleDeleteSingleImage} onDeleteGroup={handleDeleteGroup} />
-			{pictures.length === 0 && <div className='text-secondary flex min-h-screen items-center justify-center text-center text-sm'>还没有上传图片，点击右上角「编辑」后即可开始上传。</div>}
+			{isLoading ? (
+				<div className='text-secondary flex min-h-screen items-center justify-center text-center text-sm'>加载中...</div>
+			) : (
+				<>
+					<RandomLayout pictures={pictures} isEditMode={isEditMode} onDeleteSingle={handleDeleteSingleImage} onDeleteGroup={handleDeleteGroup} />
+					{pictures.length === 0 && <div className='text-secondary flex min-h-screen items-center justify-center text-center text-sm'>还没有上传图片，点击右上角「编辑」后即可开始上传。</div>}
+				</>
+			)}
 			<motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} className='absolute top-4 right-6 flex gap-3 max-sm:hidden'>
 				<AdminPasswordDialog />
 				{isEditMode ? (

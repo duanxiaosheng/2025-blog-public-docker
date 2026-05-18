@@ -14,9 +14,10 @@ import { AdminPasswordDialog } from '@/components/admin-password-dialog'
 const getRandomSnippet = (list: string[]) => (list.length === 0 ? '' : list[Math.floor(Math.random() * list.length)])
 
 export default function Page() {
-	const [snippets, setSnippets] = useState<string[]>(initialList as string[])
-	const [originalSnippets, setOriginalSnippets] = useState<string[]>(initialList as string[])
-	const [currentSnippet, setCurrentSnippet] = useState<string>(getRandomSnippet(initialList as string[]))
+	const [snippets, setSnippets] = useState<string[]>([])
+	const [originalSnippets, setOriginalSnippets] = useState<string[]>([])
+	const [currentSnippet, setCurrentSnippet] = useState<string>('')
+	const [isLoading, setIsLoading] = useState(true)
 	const [isEditMode, setIsEditMode] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [isManageOpen, setIsManageOpen] = useState(false)
@@ -29,13 +30,21 @@ export default function Page() {
 
 	useEffect(() => {
 		fetch('/api/content/snippets', { cache: 'no-store' })
-			.then(res => (res.ok ? res.json() : initialList))
+			.then(res => (res.ok ? res.json() : Promise.reject(new Error('fetch snippets failed'))))
 			.then((data: string[]) => {
 				setSnippets(data)
 				setOriginalSnippets(data)
 				setCurrentSnippet(getRandomSnippet(data))
 			})
-			.catch(() => {})
+			.catch(() => {
+				const fallback = initialList as string[]
+				setSnippets(fallback)
+				setOriginalSnippets(fallback)
+				setCurrentSnippet(getRandomSnippet(fallback))
+			})
+			.finally(() => {
+				setIsLoading(false)
+			})
 	}, [])
 
 	useEffect(() => {
@@ -123,7 +132,7 @@ export default function Page() {
 		<>
 			<div className='flex min-h-[70vh] flex-col items-center justify-center px-6 py-24'>
 				<div className='w-full max-w-3xl text-center'>
-					<p className='text-2xl leading-relaxed font-semibold'>{currentSnippet || '无'}</p>
+					<p className='text-2xl leading-relaxed font-semibold'>{isLoading ? '加载中...' : currentSnippet || '无'}</p>
 				</div>
 			</div>
 
