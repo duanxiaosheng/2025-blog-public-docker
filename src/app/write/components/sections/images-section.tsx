@@ -107,7 +107,11 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 										e.dataTransfer.setData('text/markdown', markdown)
 									}}
 								/>
-								{isCover && <div className='absolute top-2 left-2 rounded-full bg-white/35 px-2 py-1 text-[10px] text-blue-500 shadow-sm backdrop-blur-md'>封面</div>}
+								{isCover && (
+									<div className='pointer-events-none absolute inset-0 grid place-items-center bg-white/10 backdrop-blur-md'>
+										<span className='whitespace-nowrap text-[10px] font-medium text-blue-500'>封面</span>
+									</div>
+								)}
 								<div className='absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100'>
 									<button
 										type='button'
