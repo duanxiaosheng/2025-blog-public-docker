@@ -1,14 +1,69 @@
-# 2025 Blog Public Docker版本
+# 2025 Blog Local Docker
 
-　　原作者原项目开源地址为：https://github.com/YYsuni/2025-blog-public  
-　　此项目是一个由AI辅助二改后的blog项目，不再使用github key改成自定义密码进行修改文章。
+这是一个适合个人自托管的博客项目。
 
-前言：  
-　　二改缘由，逛b站看到作者的blog非常喜欢，刚好自己有个空闲服务器只部署了openclaw。然后看到项目才发现只能利用github key进行编辑文章和设置。找了很长时间也没发现有其他办法在自己的服务器部署。因为自己也是个小白，然后突发奇想利用“小龙虾”也就是openclaw进行辅助修改。用了一天时间不断的和它对战。消耗了大量token，最终得出了这个项目！（ AI好强！）
+它基于原项目 [`YYsuni/2025-blog-public`](https://github.com/YYsuni/2025-blog-public) 二次改造，保留了漂亮的卡片式首页、文章阅读页、写作页和可视化配置能力，同时把原来依赖 GitHub App / `.pem` 私钥的编辑方式，改成了更适合普通服务器部署的：
 
-## 一、最快部署方式（推荐）
+> **Docker 部署 + 本地文件保存 + 管理员密码登录。**
 
-如果你只是想在宝塔 / 1Panel / 服务器上一条命令直接跑起来，别 clone 源码，直接拉 Docker Hub 镜像：
+简单说：你不需要懂 GitHub App，不需要上传私钥，也不需要把文章交给第三方服务。把容器跑起来，第一次进入后台设置管理员密码，就可以在网页里写文章、传图片、改首页内容。
+
+---
+
+## 这个项目能做什么？
+
+- 写博客、编辑博客、删除博客
+- 上传封面图和文章图片
+- 在写作页一键把图片“填入”文章正文
+- 编辑首页内容、头像、背景、导航、社交链接等站点信息
+- 管理项目、应用导航、推荐分享、优秀博客、图片、代码片段等内容页
+- 本地保存所有运行数据，方便备份和迁移
+- 用 Docker 一键部署到服务器、宝塔、1Panel 等环境
+
+---
+
+## 项目特点
+
+### 1. 不再依赖 GitHub 私钥
+
+原项目的编辑方式需要 GitHub App private key / `.pem`。这个版本已经改为服务端管理员密码登录。
+
+首次使用时，在页面里初始化管理员密码即可。
+
+### 2. 数据都在 `data/` 目录
+
+博客文章、图片、首页配置、点赞数据、管理员初始化信息等运行数据都保存在 `data/`。
+
+所以备份和迁移很简单：
+
+> **备份整个 `data/` 目录即可。**
+
+### 3. Docker 友好
+
+项目内置：
+
+- `Dockerfile`
+- `docker-compose.yml`
+- `docker-compose.release.yml`
+- `.env.example`
+
+可以直接本地 build，也可以拉 Docker Hub 镜像运行。
+
+### 4. 适合小白和 AI 继续维护
+
+项目里有一份给后续 AI / 智能体看的维护文档：
+
+```txt
+给下一个智能体也可以编辑此仓库.md
+```
+
+如果你以后想继续改功能，可以把仓库和这份文档一起发给 AI，让它先读文档再动手。
+
+---
+
+## 最快部署方式：Docker Hub 一键运行
+
+适合宝塔、1Panel、普通 Linux 服务器。
 
 ```bash
 mkdir -p /www/wwwroot/2025-blog-local-docker/data && docker run -d \
@@ -21,42 +76,21 @@ mkdir -p /www/wwwroot/2025-blog-local-docker/data && docker run -d \
   duanxiaosheng/2025-blog-local-docker:latest
 ```
 
-部署后访问：
+启动后访问：
 
 ```txt
 http://服务器IP:3000
 ```
 
-默认首次进入后台/编辑时，会提示你**初始化管理员密码**。
-如果你没有手动传 `SESSION_SECRET`，程序会自动生成一个随机字符串并持久化保存到：
-
-```txt
-data/config/admin-auth.json
-```
+第一次进入后台、写作页或需要管理权限的地方时，会提示你初始化管理员密码。
 
 ---
 
-## 二、Docker Hub 镜像地址
+## Docker Compose 部署
 
-当前发布镜像：
+### 方式一：源码 build
 
-```txt
-duanxiaosheng/2025-blog-local-docker:latest
-```
-
-如果你后续要固定版本，也可以用：
-
-```txt
-duanxiaosheng/2025-blog-local-docker:<tag>
-```
-
----
-
-## 三、源码部署方式
-
-（适合想自己改代码、自己 build 的用户）
-
-注：Gitee 仓库，国内服务器拉取更快
+适合你要自己改代码。
 
 ```bash
 git clone https://gitee.com/duanxiaosheng/2025-blog-local-docker.git
@@ -64,7 +98,7 @@ cd 2025-blog-local-docker
 docker compose up -d --build
 ```
 
-注：GitHub 仓库，国外服务器
+GitHub 仓库：
 
 ```bash
 git clone https://github.com/duanxiaosheng/2025-blog-public-docker.git
@@ -72,54 +106,116 @@ cd 2025-blog-public-docker
 docker compose up -d --build
 ```
 
----
+### 方式二：Compose 拉取发布镜像
 
-## 四、如何访问？
-
-```txt
-http://服务器IP:3000
+```bash
+cp .env.example .env
+mkdir -p data
+docker compose -f docker-compose.release.yml up -d
 ```
 
-注：默认端口号是 `3000`。打不开就去服务器防火墙、宝塔安全组或 1Panel 防火墙里放行这个端口。
+---
+
+## 常用访问入口
+
+| 页面 | 地址 |
+| --- | --- |
+| 首页 | `http://服务器IP:3000/` |
+| 文章列表 | `http://服务器IP:3000/blog` |
+| 写文章 | `http://服务器IP:3000/write` |
+| 应用导航 | `http://服务器IP:3000/apps` |
+| 我的项目 | `http://服务器IP:3000/projects` |
+| 推荐分享 | `http://服务器IP:3000/share` |
+| 优秀博客 | `http://服务器IP:3000/bloggers` |
+| 关于网站 | `http://服务器IP:3000/about` |
+
+如果用了域名反代，把 `服务器IP:3000` 换成你的域名即可。
 
 ---
 
-## 五、首次使用注意事项【必看】
+## 首次使用说明
 
-1、第一次进入编辑或后台时，系统会提示你初始化管理员密码。  
-如果你在启动容器时手动传了 `ADMIN_PASSWORD`，那后台密码就由这个环境变量控制，初始化页面会被跳过。
+### 1. 初始化管理员密码
 
-2、如果密码忘记？  
-- **环境变量模式**：直接改容器里的 `ADMIN_PASSWORD` 后重启容器
-- **本地初始化模式**：删除 `data/config/admin-auth.json` 后重启容器，再重新初始化
+默认不需要提前配置密码。
 
-3、目录保存在哪个位置？  
-如果按上面的 Docker Hub 一键命令部署，默认数据目录是：
+第一次访问需要管理权限的页面时，系统会提示你设置管理员密码。设置完成后，就可以登录后台进行修改。
+
+### 2. 如果想用环境变量固定密码
+
+可以在运行容器时传：
+
+```bash
+-e ADMIN_PASSWORD='你的管理员密码'
+-e SESSION_SECRET='一串足够长的随机字符串'
+```
+
+说明：
+
+- 设置 `ADMIN_PASSWORD` 后，会跳过页面初始化流程
+- `SESSION_SECRET` 用于签名登录会话
+- 如果不设置 `SESSION_SECRET`，程序会自动生成并保存到 `data/config/admin-auth.json`
+
+### 3. 忘记密码怎么办？
+
+分两种情况：
+
+- 如果你用的是 `ADMIN_PASSWORD` 环境变量：改环境变量后重启容器
+- 如果你用的是页面初始化密码：删除 `data/config/admin-auth.json` 后重启容器，再重新初始化
+
+---
+
+## 数据目录说明
+
+默认数据目录：
+
+```txt
+data/
+```
+
+常见内容：
+
+```txt
+data/config/          站点配置、管理员登录配置
+data/content/         首页与各内容页数据
+data/public/blogs/    博客文章、封面、文章图片
+data/public/images/   公共上传图片
+data/likes/           点赞数据
+```
+
+如果你用上面的一键 Docker 命令部署，宿主机数据目录是：
 
 ```txt
 /www/wwwroot/2025-blog-local-docker/data
 ```
 
-里面包含：
-- 文章
-- 图片
-- 首页配置
-- 管理员密码初始化信息
-- 点赞数据
+---
 
-4、如何备份/迁移项目？  
-直接备份整个 `data/` 目录即可。迁移到新服务器时，把这个目录复制过去再启动容器。
+## 备份与迁移
 
-5、如何彻底清理部署的文件？  
-删除容器，再删除宿主机挂载目录即可。
+### 备份
 
-6、其他问题暂时未遇到，如果有可以联系我QQ：3983430，你也可以将此仓库链接发给你的AI助手，让他帮你继续完善！（项目中有一个专门写给下一个ai的md文档，可以告诉它先读取这个文档再进行完善项目）
+```bash
+cd /www/wwwroot/2025-blog-local-docker
+tar -czf blog-data-backup.tar.gz data
+```
+
+### 迁移
+
+1. 在新服务器部署同一个镜像或同一份源码
+2. 把旧服务器的 `data/` 目录复制过去
+3. 启动容器
+4. 访问网站确认内容正常
+
+一句话：
+
+> **代码可以重新拉，镜像可以重新构建，但 `data/` 一定要保管好。**
 
 ---
 
-## 六、如何更新到最新版本？
+## 更新到最新版本
 
-如果你是 Docker Hub 部署，更新命令可以直接这样跑：
+如果你是 Docker Hub 镜像部署：
 
 ```bash
 docker pull duanxiaosheng/2025-blog-local-docker:latest && docker rm -f 2025-blog-local-docker && docker run -d \
@@ -132,33 +228,134 @@ docker pull duanxiaosheng/2025-blog-local-docker:latest && docker rm -f 2025-blo
   duanxiaosheng/2025-blog-local-docker:latest
 ```
 
-如果你之前用的是默认初始化模式，更新后管理员密码和自动生成的 session secret 都会继续沿用 `data/` 里的内容。
-如果你本来就是手动传 `ADMIN_PASSWORD` / `SESSION_SECRET` 的，那更新时继续传同样的环境变量即可。
+只要继续挂载同一个 `data/` 目录，文章、图片、配置和登录信息都会保留。
 
 ---
 
-## 七、如何自己推送到 Docker Hub？
+## 开发者运行方式
 
-项目已经带了 GitHub Actions 工作流：
-
-```txt
-.github/workflows/docker-image.yml
-```
-
-你只需要在 GitHub 仓库 Secrets 里配置：
-
-- `DOCKERHUB_USERNAME`
-- `DOCKERHUB_TOKEN`
-
-之后每次推送到 `main`，都会自动构建并推送镜像到 Docker Hub。
-
-如果你想手工推，也可以：
+本项目使用 pnpm：
 
 ```bash
-docker login
-docker build -t duanxiaosheng/2025-blog-local-docker:latest .
-docker push duanxiaosheng/2025-blog-local-docker:latest
+pnpm install
+pnpm dev
 ```
+
+开发地址：
+
+```txt
+http://localhost:2025
+```
+
+构建：
+
+```bash
+pnpm build
+```
+
+生产启动：
+
+```bash
+pnpm start
+```
+
+数据健康检查：
+
+```bash
+pnpm check:data
+```
+
+> 注意：项目声明的包管理器是 `pnpm@10.15.0`。Dockerfile 也已经使用 pnpm 安装依赖。
+
+---
+
+## 重要文件说明
+
+| 文件/目录 | 作用 |
+| --- | --- |
+| `src/app/write/` | 写文章、编辑文章页面 |
+| `src/app/blog/` | 文章列表和文章详情页 |
+| `src/components/nav-card.tsx` | 首页/全站导航卡片 |
+| `src/app/(home)/config-dialog/` | 首页和站点配置弹窗 |
+| `src/lib/local-admin/` | 本地管理员、文件存储、图片路径等核心逻辑 |
+| `src/app/api/admin/` | 后台管理接口 |
+| `data/` | 运行时数据，部署后最重要的目录 |
+| `给下一个智能体也可以编辑此仓库.md` | 给后续 AI/维护者的详细接手说明 |
+
+---
+
+## 常见问题
+
+### 1. 页面打不开？
+
+先检查：
+
+- Docker 容器是否正在运行
+- 服务器安全组/防火墙是否放行 3000 端口
+- 宝塔/1Panel 是否也放行了端口
+- 是否使用了正确 IP 或域名
+
+### 2. 修改代码后没变化？
+
+如果你是 Docker 部署，改完代码后需要重新构建并重启：
+
+```bash
+docker compose up -d --build
+```
+
+### 3. 图片换浏览器看不到？
+
+大概率是图片路径保存错了，或者临时 `blob:` 地址被保存进数据。可以运行：
+
+```bash
+pnpm check:data
+```
+
+### 4. 管理员登录异常？
+
+检查：
+
+```txt
+data/config/admin-auth.json
+```
+
+如果忘记初始化密码，可以删除这个文件后重启容器再重新初始化。
+
+---
+
+## 给想继续二改的人
+
+这个项目已经经过较多 AI 辅助改造。继续修改前，建议先读：
+
+```txt
+给下一个智能体也可以编辑此仓库.md
+```
+
+里面记录了项目方向、数据路径、图片路径规则、管理员登录逻辑、容易踩的坑、近期改动和推荐修改流程。
+
+如果你用 AI 继续维护，可以直接告诉它：
+
+> 先阅读 README.md 和《给下一个智能体也可以编辑此仓库.md》，再修改项目。
+
+---
+
+## Docker Hub 镜像
+
+```txt
+duanxiaosheng/2025-blog-local-docker:latest
+```
+
+---
+
+## 原项目致谢
+
+原项目：
+
+```txt
+https://github.com/YYsuni/2025-blog-public
+```
+
+感谢原作者提供漂亮的博客设计和基础代码。本仓库是在此基础上的自托管、本地化、Docker 化改造版本。
 
 ---
 
