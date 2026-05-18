@@ -107,7 +107,7 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 										e.dataTransfer.setData('text/markdown', markdown)
 									}}
 								/>
-								{isCover && <div className='absolute top-2 left-2 rounded-full bg-blue-500 px-2 py-1 text-[10px] text-white shadow'>封面</div>}
+								{isCover && <div className='absolute top-2 left-2 rounded-full bg-transparent px-2 py-1 text-[10px] text-blue-500 shadow-none'>封面</div>}
 								<div className='absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 sm:transition sm:group-hover:opacity-100'>
 									<button
 										type='button'
@@ -119,9 +119,9 @@ export function ImagesSection({ delay = 0 }: ImagesSectionProps) {
 							</div>
 							<button
 								type='button'
-								className='w-full rounded-xl border border-neutral-200/80 bg-white/88 px-3 py-2 text-[11px] font-medium text-neutral-700 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white active:translate-y-0'
+								className='w-full rounded-xl border border-neutral-200/80 bg-white/88 px-3 py-1 text-[6px] font-medium text-red-500 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white active:translate-y-0'
 								onClick={() => insertImageMarkdown(markdown)}>
-								插入
+								填入
 							</button>
 						</div>
 					)
