@@ -85,7 +85,7 @@ export function WriteActions() {
 							</button>
 
 							{confirmingDelete && (
-								<div className='absolute right-0 bottom-full mb-2 flex min-w-max items-center gap-2 rounded-xl border border-red-200 bg-white/95 px-3 py-2 text-sm shadow-sm backdrop-blur'>
+								<div className='absolute top-full right-0 mt-2 flex min-w-max items-center gap-2 rounded-xl border border-red-200 bg-white/95 px-3 py-2 text-sm shadow-sm backdrop-blur'>
 									<span className='text-red-600'>{form?.title ? `确认删除《${form.title}》？` : '确认删除？'}</span>
 									<button type='button' className='rounded-lg bg-red-500 px-3 py-1 text-white' disabled={loading} onClick={onDelete}>
 										确认
